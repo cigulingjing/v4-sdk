@@ -31,12 +31,12 @@ In [Our Uniswap V4 SDK](https://github.com/tofudfy/v4-sdk) repo:
 2. Deploy [Uniswap V4 core](https://github.com/Uniswap/v4-core) contracts
 
 3. Configure blockchain networks, wallet, and contract addresses in:  
-   `scripts/frontend/lib/address.ts`
+   `scripts/config.ts`
 
 4. Run the hook deployment script:
 
    ```bash
-   npx hardhat run scripts/frontend/depoly/depoly.ts
+   npx hardhat run scripts/depoly/depoly.ts
    ```
 
    - Limit Order Hook: `contracts/LimitOrder.sol`  

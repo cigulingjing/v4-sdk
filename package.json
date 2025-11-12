@@ -2,10 +2,12 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-ignition-ethers": "^0.15.5",
     "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
-    "hardhat": "^2.22.8"
+    "hardhat": "^2.22.8",
+    "ethers":"^5.8.2"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "solc":"^0.8.28"
   }
 }

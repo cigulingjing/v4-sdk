@@ -1,11 +1,13 @@
-import { Contract, Wallet, JsonRpcProvider } from "ethers";
+import {ethers} from "hardhat";
+import {Wallet , Contract} from "ethers";
+
 import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, SALT } from "../config";
 import { ModifyPositionParams, PoolKey } from "../lib/types";
 import { getPoolPrice, getPoolSqrtPrice, modifyPosition } from "../lib/pool";
 import { getERC20Balance, isApproved, approveERC20 } from "../lib/erc20";
 import { calculateLiqDelta, calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
 
-async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: BigInt, amount1: BigInt, poolKey: PoolKey): Promise<void> {
+async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: PoolKey): Promise<void> {
     const token0 = new Contract(CONTRACT_ADDRESSES.token0, CONTRACTS['MockERC20Custom'].abi, wallet);
     const token1 = new Contract(CONTRACT_ADDRESSES.token1, CONTRACTS['MockERC20Custom'].abi, wallet);
     const liqPool = new Contract(CONTRACT_ADDRESSES.liquidityProvider, CONTRACTS['LiquidityPool'].abi, wallet);
@@ -38,15 +40,15 @@ async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, am
 }
 
 async function main(): Promise<void> {
-    const provider = new JsonRpcProvider(RPC_URL);
+    const provider = new ethers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
     const token0 = new Contract(CONTRACT_ADDRESSES.token0, CONTRACTS['MockERC20Custom'].abi, wallet);
     const token1 = new Contract(CONTRACT_ADDRESSES.token1, CONTRACTS['MockERC20Custom'].abi, wallet);
     const liqPool = new Contract(CONTRACT_ADDRESSES.liquidityProvider, CONTRACTS['LiquidityPool'].abi, wallet);
 
-    const token0Before = await getERC20Balance(token0, wallet.address);
-    const token1Before = await getERC20Balance(token1, wallet.address);
+    const token0Before = (await getERC20Balance(token0, wallet.address)).valueOf();
+    const token1Before = (await getERC20Balance(token1, wallet.address)).valueOf();
     console.log("Token0 balance before adding liquidity:", token0Before.toString());
     console.log("Token1 balance before adding liquidity:", token1Before.toString());
 
@@ -62,8 +64,8 @@ async function main(): Promise<void> {
     poolPrice = await getPoolPrice(liqPool);
     console.log(`Current price of pool ${liqPool.address} after adding liquidity is ${poolPrice} (Adding liquidity does not impact the asset price).`);
 
-    const token0After = await getERC20Balance(token0, wallet.address);
-    const token1After = await getERC20Balance(token1, wallet.address);
+    const token0After = (await getERC20Balance(token0, wallet.address)).valueOf();
+    const token1After = (await getERC20Balance(token1, wallet.address)).valueOf();
     console.log("Token0 change:", token0After - token0Before);
     console.log("Token1 change:", token1After - token1Before);
 }

@@ -66,8 +66,8 @@ async function main(): Promise<void> {
     const token0 = new Contract(CONTRACT_ADDRESSES.token0, CONTRACTS['MockERC20Custom'].abi, wallet);
     const token1 = new Contract(CONTRACT_ADDRESSES.token1, CONTRACTS['MockERC20Custom'].abi, wallet);
 
-    const token0Before = await getERC20Balance(token0, wallet.address);
-    const token1Before = await getERC20Balance(token1, wallet.address);
+    const token0Before = (await getERC20Balance(token0, wallet.address)).valueOf();
+    const token1Before = (await getERC20Balance(token1, wallet.address)).valueOf();
     console.log("Token0 balance before adding Limit order:", token0Before.toString());
     console.log("Token1 balance before adding limit order:", token1Before.toString());
 
@@ -75,8 +75,8 @@ async function main(): Promise<void> {
     const epo = await killLimitOrderFrontend(token1, token0, price, POOL_KEYS.limitOrderPoolKey, SALT_LIMITORDER, wallet)
     console.log("epoch:", epo);
 
-    const token0After = await getERC20Balance(token0, wallet.address);
-    const token1After = await getERC20Balance(token1, wallet.address);
+    const token0After = (await getERC20Balance(token0, wallet.address)).valueOf();
+    const token1After = (await getERC20Balance(token1, wallet.address)).valueOf();
     console.log("Token0 change:", token0After - token0Before);
     console.log("Token1 change:", token1After - token1Before);
 }

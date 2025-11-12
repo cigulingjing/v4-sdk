@@ -40,7 +40,7 @@ export async function getLiquidity(contract: Contract, poolKey: PoolKey) {
     return liquidity;
 }
 
-export async function getPoolSqrtPrice(liqPool: Contract): Promise<BigInt> {
+export async function getPoolSqrtPrice(liqPool: Contract): Promise<bigint> {
     const slot0 = await getSlot0(liqPool);
     return slot0[0];
 }

@@ -1,5 +1,7 @@
+// 类型导入，再编译阶段进行类型检查，并不会生成运行时代码，确保ethers版本使用的是hardhat内置版本
+import type { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
-import { Contract, Signer } from "ethers";
+
 import { RPC_URL, PRIVATE_KEY, CONTRACTS, CONTRACT_ADDRESSES, POOL_KEYS } from "../config";
 import { getERC20Balance } from "../lib/erc20";
 
@@ -12,7 +14,7 @@ export async function deployContract(contractName: string, params?: any, wallet?
     const contract = await Factory.deploy(...params);
     await contract.waitForDeployment();
     // console.log(`${contractName} deployed to: ${contract.address}`);
-    return contract;
+    return contract as unknown as Contract;
 }
 
 async function main() {
@@ -23,7 +25,7 @@ async function main() {
     // Deploy ERC20 tokens
     let token0 = await deployContract("MockERC20Custom", ["token0", "t0", ethers.parseUnits("2100000", 18)], wallet);
     let token1 = await deployContract("MockERC20Custom", ["token1", "t1", ethers.parseUnits("2100000", 18)], wallet);
-    if ( token0.target > token1.target ) {
+    if (token0.target > token1.target) {
         const temp = token0;
         token0 = token1;
         token1 = temp;

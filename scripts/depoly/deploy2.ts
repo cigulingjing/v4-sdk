@@ -1,8 +1,9 @@
 import { ethers } from "hardhat";
-import { Contract } from "ethers";
+import type { Contract } from "ethers";
 import { CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY } from "../config";
 import { isDeployed } from "../lib/utils";
 import { mintERC20 } from "../lib/erc20";
+import { DeterministicDeployFactory } from "../../typechain-types";
 
 // Constants that correspond to the ones in Solidity
 const FLAG_MASK = BigInt(0x3FFF);
@@ -25,7 +26,8 @@ const AFTER_SWAP_RETURNS_DELTA_FLAG = BigInt(1 << 2);
 const AFTER_ADD_LIQUIDITY_RETURNS_DELTA_FLAG = BigInt(1 << 1);
 const AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA_FLAG = BigInt(1 << 0);
 
-export async function deployCreate2(create2: Contract, contractName: string, types: string[], params: any[], saltHex: string) {
+// DeterministicDeployFactory 代表链上的Solidity合约，其利用Create2在固定位置部署合约
+export async function deployCreate2(create2: DeterministicDeployFactory, contractName: string, types: string[], params: any[], saltHex: string) {
     // Load the contract artifact using TypeScript
     const scArtifact = CONTRACTS[contractName];
     const bytecode = scArtifact.bytecode.object;
@@ -106,8 +108,9 @@ async function main() {
         token0Addr = token1Addr;
         token1Addr = temp;
     }
-    const token0 = new Contract(token0Addr, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new Contract(token1Addr, CONTRACTS['MockERC20Custom'].abi, wallet);
+
+    const token0 = new ethers.Contract(token0Addr, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const token1 = new ethers.Contract(token1Addr, CONTRACTS['MockERC20Custom'].abi, wallet);
     mintERC20(token0, wallet.address, ethers.parseUnits("2100000", 18));
     mintERC20(token1, wallet.address, ethers.parseUnits("2100000", 18));
 

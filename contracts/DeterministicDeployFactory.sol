@@ -13,7 +13,6 @@ contract DeterministicDeployFactory {
                 revert(0, 0)
             }
         }
-
         emit Deploy(addr);
     }
 }
