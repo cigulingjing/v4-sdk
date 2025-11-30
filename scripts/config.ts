@@ -1,6 +1,6 @@
-import { keccak256 } from "ethers"; 
+import { ethers } from "hardhat";
 import * as dotenv from "dotenv";
-dotenv.config({path: "../env"});
+dotenv.config({ path: "../env" });
 
 // ============================== Chain & Wallet Setup ======================================
 
@@ -10,22 +10,25 @@ export const PRIVATE_KEY = process.env.PRIVATE_KEY || "ac0974bec39a17e36ba4a6b4d
 // ============================== Contract Addresses ========================================
 
 export const CONTRACT_ADDRESSES = {
-  token0: "0x36772542E68Ff172b9c62870Ef1570F467DF8736",
-  token1: "0xd9b3d09F662b3B5479a785AC6ABa5Dd17A132Dc3",
-  poolManager: "0x5D81e90A6C670E12260AB165667efa4E535e4B8d",
-  liquidityProvider: "0x9941eCab14bdf4F6c7A7d0B4C2E4Dd78C92Ce4eD",
-  hook: "0x91D0363b1a5e0C871b2D914303F12Bd659B75040",
-  hookFee: "",
+  Token0: "0x6F282A9aB802c906c61dbE6848F8a8464A1308F7",
+  Token1: "0x8d7F2Bc6785CC4Cc2447551f5702E0E594636c9A",
+  PoolManager: "0xDB0412DaB8210ccA6d9875eE0be7b580A3c12046",
+  LiquidPool: "0x465Bfa1022e23f7eDbaf788dD18e99913dB66b32",
+  LimitOrder: "0xdc644Aa15758ec7C13CD0aAa3a36090b37781040",
+  DynamicFee: "0xFC83Be3392c061bC60840d1BA541a6C406331040",
+  Create2: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
 };
 
 // ============================== Contract ABIs ============================================
 
-export const CONTRACTS: { [contractName: string]: any} = {
-  PoolManager: require('../foundry-out/PoolManager.sol/PoolManager.json'),
-  MockERC20Custom: require('../foundry-out/MockERC20Custom.sol/MockERC20Custom.json'),
-  LiquidityPool: require('../foundry-out/LiquidityPool.sol/LiquidityPool.json'),
-  LimitOrder: require('../foundry-out/LimitOrder.sol/LimitOrder.json'),
-  DynamicFee: require('../foundry-out/DynamicFee.sol/DynamicFee.json'),
+export const CONTRACTS: { [contractName: string]: any } = {
+  PoolManager: require('../artifacts/@uniswap/v4-core/src/PoolManager.sol/PoolManager.json'),
+  MockERC20: require('../artifacts/contracts/MockERC20.sol/MockERC20.json'),
+  LiquidPool: require('../artifacts/contracts/LiquidPool.sol/LiquidPool.json'),
+  LimitOrder: require('../artifacts/contracts/LimitOrder.sol/LimitOrder.json'),
+  DynamicFee: require('../artifacts/contracts/DynamicFee.sol/DynamicFee.json'),
+  Create2: require("../artifacts/contracts/Create2.sol/Create2.json"),
+  Example: require('../artifacts/contracts/Example.sol/Example.json'),
 };
 
 // ============================== Pool Keys ================================================
@@ -34,22 +37,22 @@ const DYNAMIC_FEE_FLAG = 0x800000;
 
 export const POOL_KEYS = {
   limitOrderPoolKey: {
-    currency0: CONTRACT_ADDRESSES.token0,
-    currency1: CONTRACT_ADDRESSES.token1,
+    currency0: CONTRACT_ADDRESSES.Token0,
+    currency1: CONTRACT_ADDRESSES.Token1,
     fee: 60,
     tickSpacing: 60,
-    hooks: CONTRACT_ADDRESSES.hook,
+    hooks: CONTRACT_ADDRESSES.LimitOrder,
   },
   dynamicFeePoolKey: {
-    currency0: CONTRACT_ADDRESSES.token0,
-    currency1: CONTRACT_ADDRESSES.token1,
+    currency0: CONTRACT_ADDRESSES.Token0,
+    currency1: CONTRACT_ADDRESSES.Token1,
     fee: DYNAMIC_FEE_FLAG,
     tickSpacing: 60,
-    hooks: CONTRACT_ADDRESSES.hookFee,
+    hooks: CONTRACT_ADDRESSES.DynamicFee,
   },
 };
 
-export const SALT = keccak256("0x00")
-export const SALT_LIMITORDER = keccak256("0x01")
+export const SALT = ethers.utils.keccak256("0x00")
+export const SALT_LIMITORDER = ethers.utils.keccak256("0x01")
 export const PRICE_INIT = 100
 export const PRICE_LIMIT = 101

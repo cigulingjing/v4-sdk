@@ -8,9 +8,9 @@ import { priceToSqrtPrice } from "../lib/liqCalculation";
 
 // Swap function that handles token approval and execution
 export async function swap(wallet: ethers.Wallet, amountIn: BigInt, zeroForOne: boolean, hookData: string): Promise<void> {
-    const token0 = new ethers.Contract(CONTRACT_ADDRESSES.token0, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new ethers.Contract(CONTRACT_ADDRESSES.token1, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const liqPool = new ethers.Contract(CONTRACT_ADDRESSES.liquidityProvider, CONTRACTS['LiquidityPool'].abi, wallet);
+    const token0 = new ethers.Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const token1 = new ethers.Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const liqPool = new ethers.Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidityPool'].abi, wallet);
     
     const pricecur = await getPoolPrice(liqPool);
 
@@ -41,7 +41,7 @@ export async function swap(wallet: ethers.Wallet, amountIn: BigInt, zeroForOne: 
 
     // Check and approve ERC20 tokens if necessary
     const token = zeroForOne ? token0 : token1;
-    await approveERC20(token, await liqPool.getAddress(), ethers.parseUnits("210000", 18));
+    await approveERC20(token, await liqPool.getAddress(), ethers.utils.parseUnits("210000", 18).toBigInt());
     /*
     if (!(await isApproved(token, wallet.address, liqPool.address, amountIn))) {
         await approveERC20(token, liqPool.address, amountIn);
@@ -53,12 +53,12 @@ export async function swap(wallet: ethers.Wallet, amountIn: BigInt, zeroForOne: 
 
 // Main function to execute the swap and display results
 export async function main(): Promise<void> {
-    const provider = new ethers.JsonRpcProvider(RPC_URL);
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
-    const token0 = new ethers.Contract(CONTRACT_ADDRESSES.token0, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new ethers.Contract(CONTRACT_ADDRESSES.token1, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const liqPool = new ethers.Contract(CONTRACT_ADDRESSES.liquidityProvider, CONTRACTS['LiquidityPool'].abi, wallet);
+    const token0 = new ethers.Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const token1 = new ethers.Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const liqPool = new ethers.Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidityPool'].abi, wallet);
 
     const token0Before = await getERC20Balance(token0, wallet.address);
     const token1Before = await getERC20Balance(token1, wallet.address);
@@ -73,7 +73,7 @@ export async function main(): Promise<void> {
     const x = zeroForOne? 0 : 1;
     console.log(`swap ${swapAmount.toString()} amount of token${1-x} from token${x}`);
     // used for LimitOrder.sol afterSwap
-    const hookData = ethers.AbiCoder.defaultAbiCoder().encode(["bytes32"], [SALT_LIMITORDER]);
+    const hookData = ethers.utils.defaultAbiCoder.encode(["bytes32"], [SALT_LIMITORDER]);
     await swap(wallet, swapAmount, zeroForOne, hookData);
 
     const token0After = await getERC20Balance(token0, wallet.address);

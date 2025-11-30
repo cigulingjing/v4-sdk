@@ -1,8 +1,9 @@
-import { Contract, Wallet, JsonRpcProvider } from "ethers";
+import { Contract, Wallet } from "ethers";
+import {ethers} from "hardhat";
 import { CONTRACT_ADDRESSES, CONTRACTS, PRIVATE_KEY, RPC_URL } from "../config";
 import { getERC20Balance } from "../lib/erc20";
 
-async function withdrawLimitOrder(contract: Contract, epoch: number, to: string): Promise<void> {
+async function withdrawLimitOrder(contract: Contract, epoch: number, to: string): Promise<{ owner: string; epoch: string; liquidity: string; }> {
     try {
         // Initiate the withdraw transaction
         const tx = await contract.withdraw(epoch, to);
@@ -10,10 +11,10 @@ async function withdrawLimitOrder(contract: Contract, epoch: number, to: string)
 
         // Return a promise that resolves when the "Kill" event is emitted
         return new Promise((resolve, reject) => {
-            contract.once("Kill", (owner, epoch, liquidity) => {
+            contract.once("Kill", (owner, eventEpoch, liquidity) => {
                 resolve({
                     owner,
-                    epoch: epoch.toString(),
+                    epoch: eventEpoch.toString(),
                     liquidity: liquidity.toString(),
                 });
             });
@@ -21,6 +22,7 @@ async function withdrawLimitOrder(contract: Contract, epoch: number, to: string)
 
     } catch (error: any) {
         handleContractError(error);
+        throw error;
     }
 }
 
@@ -43,15 +45,15 @@ function handleContractError(error: any): void {
     }
 }
 
-async function withdrawLimitOrder_Old(contract: Contract, epoch: number, to: string): Promise<void> {
+async function withdrawLimitOrder_Old(contract: Contract, epoch: number, to: string): Promise<{ owner: string; epoch: string; liquidity: string; }> {
     const tx = await contract.withdraw(epoch, to);
     await tx.wait();
 
     return new Promise((resolve, reject) => {
-        contract.once("Kill", (owner, epoch, liquidity) => {
+        contract.once("Kill", (owner, eventEpoch, liquidity) => {
             resolve({
                 owner,
-                epoch: epoch.toString(),
+                epoch: eventEpoch.toString(),
                 liquidity: liquidity.toString()
             });
         });
@@ -59,18 +61,18 @@ async function withdrawLimitOrder_Old(contract: Contract, epoch: number, to: str
 }
 
 async function main(){
-    const provider = new JsonRpcProvider(RPC_URL);
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
-    const token0 = new Contract(CONTRACT_ADDRESSES.token0, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new Contract(CONTRACT_ADDRESSES.token1, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const token0 = new Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const token1 = new Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS['MockERC20Custom'].abi, wallet);
 
     const token0Before = await getERC20Balance(token0, wallet.address);
     const token1Before = await getERC20Balance(token1, wallet.address);
     console.log("Token0 balance before adding Limit order:", token0Before.toString());
     console.log("Token1 balance before adding limit order:", token1Before.toString());
 
-    const hook = new Contract(CONTRACT_ADDRESSES.hook, CONTRACTS['LimitOrder'].abi, wallet);
+    const hook = new Contract(CONTRACT_ADDRESSES.LimitOrder, CONTRACTS['LimitOrder'].abi, wallet);
     const epoch = 1
     const epo = await withdrawLimitOrder(hook, epoch, wallet.address);
     console.log("epoch:", epo);

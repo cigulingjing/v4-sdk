@@ -1,4 +1,5 @@
-import { Contract, Wallet, JsonRpcProvider } from "ethers";
+import { Contract, Wallet } from "ethers";
+import { ethers } from "hardhat";
 import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, PRIVATE_KEY, RPC_URL, SALT_LIMITORDER, PRICE_LIMIT } from "../config";
 import { calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
 import { PoolKey } from "../lib/types";
@@ -25,8 +26,8 @@ async function killLimitOrder(contract: Contract, poolKey: any, tickLower: numbe
 }
 
 async function killLimitOrderFrontend(token0: Contract, token1: Contract, priceLimit: number, poolkey: PoolKey, saltHex: string, wallet: Wallet){
-    const liqPool = new Contract(CONTRACT_ADDRESSES.liquidityProvider, CONTRACTS['LiquidityPool'].abi, wallet);
-    const hook = new Contract(CONTRACT_ADDRESSES.hook, CONTRACTS['LimitOrder'].abi, wallet);
+    const liqPool = new Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidityPool'].abi, wallet);
+    const hook = new Contract(CONTRACT_ADDRESSES.LimitOrder, CONTRACTS['LimitOrder'].abi, wallet);
 
     const priceCurrent = await getPoolPrice(liqPool);
     const tickcurr = calculateTickFromPriceWithSpacing(priceCurrent, poolkey.tickSpacing)
@@ -60,11 +61,11 @@ async function killLimitOrderFrontend(token0: Contract, token1: Contract, priceL
 }
 
 async function main(): Promise<void> {
-    const provider = new JsonRpcProvider(RPC_URL);
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
-    const token0 = new Contract(CONTRACT_ADDRESSES.token0, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new Contract(CONTRACT_ADDRESSES.token1, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const token0 = new Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const token1 = new Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS['MockERC20Custom'].abi, wallet);
 
     const token0Before = (await getERC20Balance(token0, wallet.address)).valueOf();
     const token1Before = (await getERC20Balance(token1, wallet.address)).valueOf();

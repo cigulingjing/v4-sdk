@@ -11,8 +11,10 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {CurrencyDelta, Currency} from '@uniswap/v4-core/src/libraries/CurrencyDelta.sol';
 import {TickMath} from '@uniswap/v4-core/src/libraries/TickMath.sol';
+import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 
-contract LiquidityPosition is IUnlockCallback {
+
+contract LiquidPool is IUnlockCallback {
     using SafeERC20 for IERC20;
     using CurrencyDelta for Currency;
     using StateLibrary for IPoolManager;
@@ -52,7 +54,7 @@ contract LiquidityPosition is IUnlockCallback {
         LiquidityParams calldata params, 
         bytes calldata hookData
     ) external {
-        IPoolManager.ModifyLiquidityParams memory positionParams = IPoolManager.ModifyLiquidityParams({
+        ModifyLiquidityParams memory positionParams = ModifyLiquidityParams({
             tickLower: params.tickLower,
             tickUpper: params.tickUpper,
             liquidityDelta: params.liquidityDelta,
@@ -67,7 +69,7 @@ contract LiquidityPosition is IUnlockCallback {
     }
 
     function executeSwap(
-        IPoolManager.SwapParams memory params, 
+        SwapParams memory params, 
         bytes calldata hookData
     ) external {
         _unlock(FUNCSIG_SWAP, abi.encode(params, hookData));
@@ -113,7 +115,8 @@ contract LiquidityPosition is IUnlockCallback {
     }
 
     function _handleLiquidity(bytes memory args, address recipient) private {
-        (IPoolManager.ModifyLiquidityParams memory positionParams, bytes memory hookData) = abi.decode(args, (IPoolManager.ModifyLiquidityParams, bytes));
+        (ModifyLiquidityParams memory positionParams, bytes memory hookData) = 
+            abi.decode(args, (ModifyLiquidityParams, bytes));
 
         (BalanceDelta delta, BalanceDelta fees) = poolManager.modifyLiquidity(key, positionParams, hookData);
         
@@ -124,7 +127,7 @@ contract LiquidityPosition is IUnlockCallback {
     }
     
     function _handleSwap(bytes memory args, address recipient) private {
-        (IPoolManager.SwapParams memory swapParams, bytes memory hookData) = abi.decode(args, (IPoolManager.SwapParams, bytes));
+        (SwapParams memory swapParams, bytes memory hookData) = abi.decode(args, (SwapParams, bytes));
         
         BalanceDelta delta = poolManager.swap(key, swapParams, hookData);
         
@@ -142,16 +145,22 @@ contract LiquidityPosition is IUnlockCallback {
     }
 
     // [Mark] ref: https://learnblockchain.cn/article/6984
+    /*
+    * 根据 poolManager 返回的余额变动 deltaAmount，把资金在池（poolManager）和调用者/接收者（recipient）之间结算清算
+    */
     function _settleCurrencyBalance(
         Currency currency,
         address recipient,
         int128 deltaAmount
     ) private {
         if (deltaAmount > 0) {
+            // send deltaAmount of token to recipient
             poolManager.take(currency, recipient, uint128(deltaAmount));
         } else if (deltaAmount < 0) {
             uint128 amount = uint128(-deltaAmount);
-            if (currency.isNative()) {
+            // isAdressZero() checks if the currency is the native Ethereum token (ETH)
+            if (currency.isAddressZero()) {
+                // ETH don't need call ERC20 interface to transfer.
                 currency.transfer(address(poolManager), amount);
                 // todo: is {value: uint128(deltaAmount)} correct? 
                 poolManager.settle{value: uint128(deltaAmount)}();

@@ -8,9 +8,9 @@ import { getERC20Balance, isApproved, approveERC20 } from "../lib/erc20";
 import { calculateLiqDelta, calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
 
 async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: PoolKey): Promise<void> {
-    const token0 = new Contract(CONTRACT_ADDRESSES.token0, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new Contract(CONTRACT_ADDRESSES.token1, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const liqPool = new Contract(CONTRACT_ADDRESSES.liquidityProvider, CONTRACTS['LiquidityPool'].abi, wallet);
+    const token0 = new Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS['MockERC20'].abi, wallet);
+    const token1 = new Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS['MockERC20'].abi, wallet);
+    const liqPool = new Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidPool'].abi, wallet);
 
     const ticklow = calculateTickFromPriceWithSpacing(priceLower, poolKey.tickSpacing);
     const tickhigh = calculateTickFromPriceWithSpacing(priceUpper, poolKey.tickSpacing);
@@ -27,7 +27,7 @@ async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, am
     console.log("Modify position params:", modifyPositionParams);
 
     // Check ERC20 token balances and approve if necessary
-    const liqPoolAddr = await liqPool.getAddress();
+    const liqPoolAddr = liqPool.address;
     if (!(await isApproved(token0, wallet.address, liqPoolAddr, amount0Add))) {
         await approveERC20(token0, liqPoolAddr, amount0Add);
     }
@@ -40,12 +40,14 @@ async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, am
 }
 
 async function main(): Promise<void> {
-    const provider = new ethers.JsonRpcProvider(RPC_URL);
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
+    const tokenContractName="MockERC20";
+    const abi= CONTRACTS[tokenContractName].abi;
 
-    const token0 = new Contract(CONTRACT_ADDRESSES.token0, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new Contract(CONTRACT_ADDRESSES.token1, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const liqPool = new Contract(CONTRACT_ADDRESSES.liquidityProvider, CONTRACTS['LiquidityPool'].abi, wallet);
+    const token0 = new Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS[tokenContractName].abi, wallet);
+    const token1 = new Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS[tokenContractName].abi, wallet);
+    const liqPool = new Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidPool'].abi, wallet);
 
     const token0Before = (await getERC20Balance(token0, wallet.address)).valueOf();
     const token1Before = (await getERC20Balance(token1, wallet.address)).valueOf();

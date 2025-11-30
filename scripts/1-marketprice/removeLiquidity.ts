@@ -1,12 +1,13 @@
-import { Contract, Wallet, JsonRpcProvider } from "ethers";
+import { Contract, Wallet } from "ethers";
+import { ethers } from "hardhat";
 import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, SALT } from "../config";
 import { getPoolPrice, getPoolSqrtPrice, modifyPosition } from "../lib/pool";
 import { getERC20Balance } from "../lib/erc20";
 import { calculateLiqDelta, calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
 import { ModifyPositionParams } from "../lib/types";
 
-async function removeLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: BigInt, amount1: BigInt, poolKey: any): Promise<void> {
-    const liqPool = new Contract(CONTRACT_ADDRESSES.liquidityProvider, CONTRACTS['LiquidityPool'].abi, wallet);
+async function removeLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: any): Promise<void> {
+    const liqPool = new Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidityPool'].abi, wallet);
 
     const ticklow = calculateTickFromPriceWithSpacing(priceLower, poolKey.tickSpacing);
     const tickhigh = calculateTickFromPriceWithSpacing(priceUpper, poolKey.tickSpacing);
@@ -25,12 +26,12 @@ async function removeLiq(wallet: Wallet, priceLower: number, priceUpper: number,
 }
 
 async function main(): Promise<void> {
-    const provider = new JsonRpcProvider(RPC_URL);
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
-    const token0 = new Contract(CONTRACT_ADDRESSES.token0, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new Contract(CONTRACT_ADDRESSES.token1, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const liqPool = new Contract(CONTRACT_ADDRESSES.liquidityProvider, CONTRACTS['LiquidityPool'].abi, wallet);
+    const token0 = new Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const token1 = new Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const liqPool = new Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidityPool'].abi, wallet);
 
     let poolPrice = await getPoolPrice(liqPool);
     console.log(`Current price of pool ${liqPool.address} before removing liquidity is ${poolPrice}`);

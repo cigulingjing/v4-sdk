@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 // a uniswapV4 hook that allows the pool use dynamic fees
 pragma solidity ^0.8.20;
-// import "hardhat/console.sol";
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {StateLibrary} from "@uniswap/v4-core/src/libraries/StateLibrary.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
@@ -14,8 +13,8 @@ import {IERC20Minimal} from "@uniswap/v4-core/src/interfaces/external/IERC20Mini
 import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import {Currency} from "@uniswap/v4-core/src/libraries/CurrencyDelta.sol";
 import {BalanceDelta, toBalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
-import {SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 import {BeforeSwapDelta, toBeforeSwapDelta} from "@uniswap/v4-core/src/types/BeforeSwapDelta.sol";
+import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 
 /// @notice The dynamic fee manager determines fees for pools
 /// @dev note that this pool is only called if the PoolKey fee value is equal to the DYNAMIC_FEE magic value

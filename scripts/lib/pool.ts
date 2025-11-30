@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { Contract } from "ethers";
+import type { Contract } from "ethers";
 import { PoolKey, ModifyPositionParams } from "./types";
 
 export async function modifyPosition(contract: Contract, modifyPositionParams: ModifyPositionParams, hookData: string) {
@@ -11,9 +11,10 @@ export async function modifyPosition(contract: Contract, modifyPositionParams: M
 
 // Function to get Pool ID
 export function getPoolId(poolKey: PoolKey): string {
-    return ethers.keccak256(ethers.solidityPacked(
+    ;
+    return ethers.utils.keccak256(ethers.utils.solidityPack(
         ["bytes"],
-        [ethers.AbiCoder.defaultAbiCoder().encode(
+        [ethers.utils.defaultAbiCoder.encode(
             ["address", "address", "uint24", "int24", "address"],
             [poolKey.currency0, poolKey.currency1, poolKey.fee, poolKey.tickSpacing, poolKey.hooks]
         )]
@@ -49,10 +50,11 @@ export async function getPoolSqrtPrice(liqPool: Contract): Promise<bigint> {
 export async function getPoolPrice(liqPool: Contract): Promise<number> {
     const slot0 = await getSlot0(liqPool);
     const q96 = 2n ** 96n;
-    const sqrtPriceX96 = slot0[0];
+    // slot0 type is @BigNumber
+    const sqrtPriceX96:bigint = slot0[0].toBigInt();
 
-    const result = Number(sqrtPriceX96**2n * 1000n / q96**2n) / 1000;
+    const priceX1e18 = (sqrtPriceX96 * sqrtPriceX96 * (10n ** 18n)) / (q96 * q96);
+    const result = Number(priceX1e18) / 10**18;
     // console.log("price:", result.toString());
-
     return result;
 }

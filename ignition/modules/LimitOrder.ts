@@ -15,7 +15,7 @@ export default buildModule("LimitOrder", (m) => {
     // Load the contract artifact
     const contractArtifact = CONTRACTS["LimitOrder"];
     const types = ["address"];
-    const params = [CONTRACT_ADDRESSES.poolManager];
+    const params = [CONTRACT_ADDRESSES.PoolManager];
     const artifact = {
         _format: "hh-sol-artifact-1",
         contractName: "LimitOrder",
