@@ -30,7 +30,7 @@ export async function create2Deploy(create2: Contract, contractName: string, typ
     const tx = await create2.deployCreate2WithSalt(initCode,saltHex, { gasLimit: 30_000_000 });
     await tx.wait();
 
-    console.log(`deterministic deployed ${contractName} by ${tx.hash}`);
+    console.log(`deterministic deployed ${contractName} by transaction(${tx.hash})`);
     return create2Addr;
 }
 

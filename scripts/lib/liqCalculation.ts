@@ -91,7 +91,8 @@ export function liquidity0(amount: bigint, pa: bigint, pb: bigint): bigint {
     if (pa > pb) {
         [pa, pb] = [pb, pa];
     }
-    return (amount * pa * pb) / q96 / (pb - pa);
+
+    return (amount * pa * pb) / (q96 * (pb - pa));
 }
 
 export function liquidity1(amount: bigint, pa: bigint, pb: bigint): bigint {

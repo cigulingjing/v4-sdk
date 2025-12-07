@@ -1,4 +1,5 @@
-import { ethers } from "ethers";
+import { ethers } from "hardhat";
+import type { Wallet } from "ethers";
 import { CONTRACT_ADDRESSES, CONTRACTS, RPC_URL, PRIVATE_KEY, SALT, SALT_LIMITORDER } from "../config";
 import { SwapParams } from "../lib/types";
 import { getPoolPrice, getPoolSqrtPrice } from "../lib/pool";
@@ -7,11 +8,11 @@ import { executeSwap } from "../lib/swap";
 import { priceToSqrtPrice } from "../lib/liqCalculation";
 
 // Swap function that handles token approval and execution
-export async function swap(wallet: ethers.Wallet, amountIn: BigInt, zeroForOne: boolean, hookData: string): Promise<void> {
-    const token0 = new ethers.Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new ethers.Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const liqPool = new ethers.Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidityPool'].abi, wallet);
-    
+export async function swap(wallet: Wallet, amountIn: BigInt, zeroForOne: boolean, hookData: string): Promise<void> {
+    const token0=await ethers.getContractAt("MockERC20", CONTRACT_ADDRESSES.Token0, wallet);
+    const token1=await ethers.getContractAt("MockERC20", CONTRACT_ADDRESSES.Token1, wallet);
+    const liqPool=await ethers.getContractAt("LiquidPool",CONTRACT_ADDRESSES.LiquidPool, wallet);
+
     const pricecur = await getPoolPrice(liqPool);
 
     // slippage at 5%
@@ -41,7 +42,7 @@ export async function swap(wallet: ethers.Wallet, amountIn: BigInt, zeroForOne: 
 
     // Check and approve ERC20 tokens if necessary
     const token = zeroForOne ? token0 : token1;
-    await approveERC20(token, await liqPool.getAddress(), ethers.utils.parseUnits("210000", 18).toBigInt());
+    await approveERC20(token, liqPool.address, ethers.utils.parseUnits("210000", 18).toBigInt());
     /*
     if (!(await isApproved(token, wallet.address, liqPool.address, amountIn))) {
         await approveERC20(token, liqPool.address, amountIn);
@@ -56,9 +57,9 @@ export async function main(): Promise<void> {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
-    const token0 = new ethers.Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new ethers.Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const liqPool = new ethers.Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidityPool'].abi, wallet);
+    const token0=await ethers.getContractAt("MockERC20", CONTRACT_ADDRESSES.Token0, wallet);
+    const token1=await ethers.getContractAt("MockERC20", CONTRACT_ADDRESSES.Token1, wallet);
+    const liqPool=await ethers.getContractAt('LiquidPool',CONTRACT_ADDRESSES.LiquidPool,  wallet);
 
     const token0Before = await getERC20Balance(token0, wallet.address);
     const token1Before = await getERC20Balance(token1, wallet.address);

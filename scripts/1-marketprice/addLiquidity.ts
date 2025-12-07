@@ -43,11 +43,11 @@ async function main(): Promise<void> {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
     const tokenContractName="MockERC20";
-    const abi= CONTRACTS[tokenContractName].abi;
+    const liqPoolAddress= CONTRACT_ADDRESSES.LiquidPool;
 
-    const token0 = new Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS[tokenContractName].abi, wallet);
-    const token1 = new Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS[tokenContractName].abi, wallet);
-    const liqPool = new Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidPool'].abi, wallet);
+    const token0=await ethers.getContractAt(tokenContractName, CONTRACT_ADDRESSES.Token0, wallet);
+    const token1=await ethers.getContractAt(tokenContractName, CONTRACT_ADDRESSES.Token1, wallet);
+    const liqPool=await ethers.getContractAt("LiquidPool",liqPoolAddress,  wallet);
 
     const token0Before = (await getERC20Balance(token0, wallet.address)).valueOf();
     const token1Before = (await getERC20Balance(token1, wallet.address)).valueOf();
@@ -55,16 +55,16 @@ async function main(): Promise<void> {
     console.log("Token1 balance before adding liquidity:", token1Before.toString());
 
     let poolPrice = await getPoolPrice(liqPool);
-    console.log(`Current price of pool ${liqPool.target} before adding liquidity is ${poolPrice}`);
+    console.log(`Current price of pool(${liqPoolAddress}) before adding liquidity is ${poolPrice}`);
 
     const priceLower = 50;
     const priceUpper = 200;
-    const amount0 = 10000n * (10n ** 18n);
-    const amount1 = 10000n * (10n ** 18n);
+    const amount0 = 10000n;
+    const amount1 = 10000n;
     await addLiq(wallet, priceLower, priceUpper, amount0, amount1, POOL_KEYS.limitOrderPoolKey);
 
     poolPrice = await getPoolPrice(liqPool);
-    console.log(`Current price of pool ${liqPool.address} after adding liquidity is ${poolPrice} (Adding liquidity does not impact the asset price).`);
+    console.log(`Current price of pool ${liqPoolAddress} after adding liquidity is ${poolPrice} (Adding liquidity does not impact the asset price).`);
 
     const token0After = (await getERC20Balance(token0, wallet.address)).valueOf();
     const token1After = (await getERC20Balance(token1, wallet.address)).valueOf();

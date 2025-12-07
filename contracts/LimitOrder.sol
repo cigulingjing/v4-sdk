@@ -183,12 +183,11 @@ contract LimitOrder  {
         return bytes("");
     }
 
-    function afterInitialize(address, PoolKey calldata key, uint160, int24 tick, bytes calldata)
+    function afterInitialize(address, PoolKey calldata key, uint160, int24 tick)
         external
         // poolManagerOnly
         returns (bytes4)
     {
-        // console.log("afterInitialize");
         setTickLowerLast(key.toId(), getTickLower(tick, key.tickSpacing));
         return LimitOrder.afterInitialize.selector;
     }

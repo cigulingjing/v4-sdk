@@ -29,9 +29,11 @@ async function main(): Promise<void> {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
-    const token0 = new Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const liqPool = new Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidityPool'].abi, wallet);
+    const liqPoolAddress = CONTRACT_ADDRESSES.LiquidPool;
+
+    const token0=await ethers.getContractAt("MockERC20", CONTRACT_ADDRESSES.Token0, wallet);
+    const token1=await ethers.getContractAt("MockERC20", CONTRACT_ADDRESSES.Token1, wallet);
+    const liqPool=await ethers.getContractAt(CONTRACTS['LiquidPool'].abi,liqPoolAddress,  wallet);
 
     let poolPrice = await getPoolPrice(liqPool);
     console.log(`Current price of pool ${liqPool.address} before removing liquidity is ${poolPrice}`);

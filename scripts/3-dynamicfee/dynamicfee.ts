@@ -1,13 +1,8 @@
-import { JsonRpcProvider } from "ethers";
+import { ethers } from "hardhat";
+import type { Contract} from "ethers";
 
 let provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 let wallet = new ethers.Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", provider)
-console.log("myaddress:",wallet.address)
-const PoolManager = require('/Users/beihai/code/v4-core/artifacts/contracts/PoolManager.sol/PoolManager.json');
-// 定义合约接口
-const PoolManagerAbi = PoolManager.abi;
-const ERC20 = require('/Users/beihai/code/v4-core/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json');
-const erc20Abi = ERC20.abi;
 
 interface PoolKey {
     currency0: string;
@@ -49,7 +44,7 @@ async function isdepolyed(address: string) {
     }
 }
 
-async function donate(contract, poolKey, amount0, amount1) {
+async function donate(contract:Contract, poolKey:PoolKey, amount0:bigint, amount1:bigint) {
     // Donate
     console.log("begin donate")
     let to0params = {
@@ -134,15 +129,13 @@ async function withdrawLimitOrder(contract:Contract, epoch:number, to:string) {
     });
 }
 
-async function initialize(contract:Contract, key:PoolKey ,sqrtPriceX96) {
+async function initialize(contract:Contract, key:PoolKey ,sqrtPriceX96:bigint) {
     let tick = await contract.initialize(key, sqrtPriceX96);
     console.log(`Returned tick: ${JSON.stringify(tick)}`);
 }
 
-async function approveERC20(contract:Contract, toAddress: string, amount: ethers.BigNumber) {
-    // 批准ERC20代币
+async function approveERC20(contract:Contract, toAddress: string, amount: bigint) {
     let tx = await contract.approve(toAddress, amount);
-    // 等待交易被挖矿
     let receipt = await tx.wait();
     console.log(`Transaction hash: ${receipt.transactionHash}`);
 }
@@ -214,7 +207,7 @@ async function depolyContract(contractName: string, params?: any): Promise<Contr
     console.log(`${contractName} deployed to ${contract.address}`);
     return contract;
 }
-async function delay(milliseconds) {
+async function delay(milliseconds: any) {
     // 这个新的 Promise 将在指定的毫秒数后 resolve
     return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
@@ -253,7 +246,7 @@ describe("PoolManager", function () {
     // await isdepolyed(limitOrder.address);
 
     //initial poolManager
-    let sqrtPriceX96 = "792281625142643375935439503360"// price = 100 token1/token0
+    let sqrtPriceX96 = BigInt("792281625142643375935439503360")// price = 100 token1/token0
     const DYNAMIC_FEE_FLAG = 0x800000;
     let poolKey: PoolKey = {
         currency0: token0Address,
@@ -272,28 +265,28 @@ describe("PoolManager", function () {
 
     const MyLiquidityProvider = await depolyContract("MyLiquidityProvider", poolManagerAddress);
     //approve ERC20 token to MyLiquidityProvider
-    await approveERC20(token0,MyLiquidityProvider.address,ethers.utils.parseUnits("21000000", 18))
-    await approveERC20(token1,MyLiquidityProvider.address,ethers.utils.parseUnits("21000000", 18))
+    const wei=ethers.utils.parseUnits("21000000", 18).toBigInt();
+    await approveERC20(token0,MyLiquidityProvider.address,wei);
+    await approveERC20(token1,MyLiquidityProvider.address,wei);
 
     //add liquidity
     let modifyPositionParams = {
         tickLower: 45000, // lower price 90
         tickUpper: 46980, // upper price 110
         //liquidityDelta: 194868329805051412324060
-        liquidityDelta: ethers.BigNumber.from('10000000000000000000000')// 10000token0 10000token1
-        };
+        liquidityDelta: BigInt('10000000000000000000000')// 10000token0 10000token1
+    };
     
-        //console.log(`modifyPositionParams: ${JSON.stringify(modifyPositionParams)}`);
-    
-        //console.log(`Poolkey: ${JSON.stringify(poolKey)}`);
-        await getERC20Balance(token0,wallet.address);
-        await getERC20Balance(token1,wallet.address);
-    
-        await modifyPosition(MyLiquidityProvider, poolKey, modifyPositionParams);
-        console.log("Liquidity added successfully");
-    
-        await getERC20Balance(token0,wallet.address);
-        await getERC20Balance(token1,wallet.address);
+    //console.log(`modifyPositionParams: ${JSON.stringify(modifyPositionParams)}`);
+    //console.log(`Poolkey: ${JSON.stringify(poolKey)}`);
+    await getERC20Balance(token0,wallet.address);
+    await getERC20Balance(token1,wallet.address);
+
+    await modifyPosition(MyLiquidityProvider, poolKey, modifyPositionParams);
+    console.log("Liquidity added successfully");
+
+    await getERC20Balance(token0,wallet.address);
+    await getERC20Balance(token1,wallet.address);
     //swap
     let sqrtpricelimit=ethers.BigNumber.from('7922816251426433759354395033600')//price = 10000
     let amountswap = ethers.BigNumber.from('1083456789101112134000')

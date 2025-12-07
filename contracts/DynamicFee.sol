@@ -56,7 +56,7 @@ contract DynamicFee is IDynamicFeeManager{
         });
     }
 
-    function afterInitialize(address, PoolKey calldata key, uint160, int24, bytes calldata)
+    function afterInitialize(address, PoolKey calldata key, uint160, int24)
         external
         virtual
         returns (bytes4)

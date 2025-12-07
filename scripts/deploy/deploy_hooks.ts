@@ -1,10 +1,6 @@
-// 类型导入，再编译阶段进行类型检查，并不会生成运行时代码，确保ethers版本使用的是hardhat内置版本
-import type { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
-
-import { RPC_URL, PRIVATE_KEY, CONTRACTS, CONTRACT_ADDRESSES, POOL_KEYS } from "../config";
 import { deployHookWithFlags } from "./help";
-
+import { CONTRACT_ADDRESSES } from "../config";
 
 // Define the extended flags
 const ALL_HOOK_MASK = BigInt((1 << 14) - 1);
@@ -23,12 +19,11 @@ const AFTER_SWAP_RETURNS_DELTA_FLAG = BigInt(1 << 2);
 const AFTER_ADD_LIQUIDITY_RETURNS_DELTA_FLAG = BigInt(1 << 1);
 const AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA_FLAG = BigInt(1 << 0);
 
-// Deploy LimitOrder and DynamicFee hooks to pool manager
-export async function deployHooks(Create2Addr: string, poolManagerAddr:string){
+// Deploy DynamicFee hooks to pool manager
+export async function deployDynamic(Create2Addr: string, poolManagerAddr:string) : Promise<string>{
     const factory=await ethers.getContractAt("Create2", Create2Addr);
     const factoryAddr=Create2Addr;
 
-     // 3.1 Deploy DynamicFee Hook
     const flagFee: bigint = AFTER_SWAP_FLAG | AFTER_INITIALIZE_FLAG;
     const dynamicFeeHook = await deployHookWithFlags(
         factory,
@@ -38,8 +33,15 @@ export async function deployHooks(Create2Addr: string, poolManagerAddr:string){
         [poolManagerAddr],
         flagFee
     );
+    return dynamicFeeHook;
+}
 
-    // 3.2 Deploy LimitOrder Hook
+
+export async function deployLimitOrder(Create2Addr: string, poolManagerAddr:string) : Promise<string>{
+    const factory=await ethers.getContractAt("Create2", Create2Addr);
+    const factoryAddr=Create2Addr;
+
+    // Deploy LimitOrder Hook
     const flagLimit: bigint = AFTER_INITIALIZE_FLAG | AFTER_SWAP_FLAG; // | AFTER_SWAP_RETURNS_DELTA_FLAG;
     const limitOrderHook = await deployHookWithFlags(
         factory,
@@ -49,4 +51,5 @@ export async function deployHooks(Create2Addr: string, poolManagerAddr:string){
         [poolManagerAddr],
         flagLimit
     );
+    return limitOrderHook;
 }

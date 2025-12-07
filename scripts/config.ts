@@ -10,13 +10,13 @@ export const PRIVATE_KEY = process.env.PRIVATE_KEY || "ac0974bec39a17e36ba4a6b4d
 // ============================== Contract Addresses ========================================
 
 export const CONTRACT_ADDRESSES = {
+  Create2: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   Token0: "0x6F282A9aB802c906c61dbE6848F8a8464A1308F7",
   Token1: "0x8d7F2Bc6785CC4Cc2447551f5702E0E594636c9A",
   PoolManager: "0xDB0412DaB8210ccA6d9875eE0be7b580A3c12046",
-  LiquidPool: "0x465Bfa1022e23f7eDbaf788dD18e99913dB66b32",
-  LimitOrder: "0xdc644Aa15758ec7C13CD0aAa3a36090b37781040",
-  DynamicFee: "0xFC83Be3392c061bC60840d1BA541a6C406331040",
-  Create2: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+  LiquidPool: "0xf48fA4e095913E6e9b733993E2642Aa4535123fB",
+  LimitOrder: "0x1Fe235e4bc0542B221A6b8E2e55a86d28A8bd040",
+  DynamicFee: "0x541eEcD8E9A59476E436A766123B27330e149040"
 };
 
 // ============================== Contract ABIs ============================================

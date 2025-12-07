@@ -1,6 +1,8 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { Contract, Signer, BigNumber } from "ethers";
+import { CONTRACTS,CONTRACT_ADDRESSES,PRIVATE_KEY,RPC_URL } from "../scripts/config";
+import { deployMockERC20} from "../scripts/deploy/deploy_mockERC20"
 
 describe("MockERC20", function () {
     let token: Contract;
@@ -113,3 +115,30 @@ describe("MockERC20", function () {
         });
     });
 });
+
+describe("Deterministic deployment of MockERC20",function(){
+    const tokenName="BitCoin"
+    const tokenSymbol="BTC"
+    const initialSupply=ethers.utils.parseUnits("2100000", 18).toBigInt();
+    let walletAddress="0x";
+    let token0Address=CONTRACT_ADDRESSES["Token0"];
+    let wallet:Signer;
+    let token:Contract;
+
+    beforeEach(async function(){
+        const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+        wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+        walletAddress = await wallet.getAddress();    
+    });
+    
+    it("Owner",async function(){
+        const token= await ethers.getContractAt("MockERC20",token0Address,wallet);
+        let res:bigint=await token.balanceOf(walletAddress);
+        console.log(res.toString());
+
+        res=await token.balanceOf(CONTRACT_ADDRESSES["Create2"]);
+        console.log(res.toString())
+    });
+    
+});
+        

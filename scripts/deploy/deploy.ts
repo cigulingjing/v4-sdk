@@ -5,8 +5,8 @@ import { isDeployed, bigintToBytes32,abiEncode } from "../lib/utils";
 import { mintERC20 } from "../lib/erc20";
 import { create2Deploy, deployHookWithFlags } from "./help";
 import { deployMockERC20,ERC20Initial } from "./deploy_mockERC20";
-import { deployHooks } from "./deploy_hooks";
-import { initPoolManager } from "./deploy_poolmanager";
+import { deployDynamic, deployLimitOrder } from "./deploy_hooks";
+import { initPoolManager } from "./init";
 import {deployCreate2} from "./deploy_create2";
 
 async function main() {
@@ -38,13 +38,16 @@ async function main() {
     const liquidityProvider = walletAddress;
     const poolManagerAddr = await create2Deploy(factory, "PoolManager", ["address"], [liquidityProvider], salt);
 
-    // 3.1 Deploy DynamicFee Hook
-    await deployHooks(create2Address,poolManagerAddr);
+    // 3.1 Deploy DynamicFee Hook and limit order hook.
+    let dynamicAddress = await deployDynamic(create2Address,poolManagerAddr);
+    let limitOrderAddress=await deployLimitOrder(create2Address,poolManagerAddr);
 
     // 4. Deploy liquidity
-    let key = POOL_KEYS.limitOrderPoolKey;
+    let key = POOL_KEYS.limitOrderPoolKey; // old poolkey, need to update.
     key.currency0 = token0Addr;
     key.currency1 = token1Addr;
+    key.hooks=limitOrderAddress;
+
     const liquidityPoolAddr = await create2Deploy(factory, "LiquidPool", ["address", "(address,address,uint24,int24,address)"], [poolManagerAddr, Object.values(key)], salt);
     
 
@@ -55,6 +58,8 @@ async function main() {
     console.log("token1 = ", token1Addr);
     console.log("poolManager = ", poolManagerAddr);
     console.log("liquidityPool = ", liquidityPoolAddr);
+    console.log("limitOrder Hook = ", limitOrderAddress);
+    console.log("dynamicFee Hook = ", dynamicAddress);
     console.log("Please update the CONTRACT_ADDRESSES in config.ts!");
 }
 
