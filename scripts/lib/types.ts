@@ -9,13 +9,12 @@ export interface PoolKey {
 
 export interface SwapParams {
     zeroForOne: boolean;
-    amountSpecified: BigInt;
-    sqrtPriceLimitX96: BigInt;
+    amountSpecified: bigint;
+    sqrtPriceLimitX96: bigint;
 }
 
 export interface ModifyPositionParams {
     tickLower: number;
     tickUpper: number;
-    liquidityDelta: BigInt;
-    salt: string;
+    liquidityDelta: bigint;
 }

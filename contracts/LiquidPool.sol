@@ -35,7 +35,7 @@ contract LiquidPool is IUnlockCallback {
 
     mapping(address => BalanceDelta) rewards;
 
-    error InvalidParams();
+    error InvalidFuncSig();
 
     constructor(IPoolManager _poolManager, PoolKey memory _key) {
         poolManager = _poolManager;
@@ -103,12 +103,12 @@ contract LiquidPool is IUnlockCallback {
 
         if (funcSig == FUNCSIG_LIQUIDITY) {
             _handleLiquidity(args, recipient);
-        } else if (funcSig == this.executeSwap.selector) {
+        } else if (funcSig == FUNCSIG_SWAP) {
             _handleSwap(args, recipient);
-        } else if (funcSig == this.donate.selector) {
+        } else if (funcSig == FUNCSIG_DONATE) {
             _handleDonate(args, recipient);
         } else {
-            revert InvalidParams();
+            revert InvalidFuncSig();
         }
 
         return bytes("");

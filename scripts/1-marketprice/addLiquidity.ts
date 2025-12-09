@@ -15,6 +15,7 @@ async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, am
     const ticklow = calculateTickFromPriceWithSpacing(priceLower, poolKey.tickSpacing);
     const tickhigh = calculateTickFromPriceWithSpacing(priceUpper, poolKey.tickSpacing);
     const sqrtCurrent = await getPoolSqrtPrice(liqPool);
+
     const [liqDelta, amount0Add, amount1Add] = calculateLiqDelta(ticklow, sqrtCurrent, tickhigh, amount0, amount1);
     console.log(`Attempting to add liquidity ${liqDelta} to price range [${priceLower}, ${priceUpper}] with amount0&1 [${amount0Add.toString()}, ${amount1Add.toString()}]`);
 
@@ -22,7 +23,6 @@ async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, am
         tickLower: ticklow,
         tickUpper: tickhigh,
         liquidityDelta: liqDelta,
-        salt: SALT
     };
     console.log("Modify position params:", modifyPositionParams);
 
@@ -59,8 +59,8 @@ async function main(): Promise<void> {
 
     const priceLower = 50;
     const priceUpper = 200;
-    const amount0 = 10000n;
-    const amount1 = 10000n;
+    const amount0 = 1000n;
+    const amount1 = 1000n;
     await addLiq(wallet, priceLower, priceUpper, amount0, amount1, POOL_KEYS.limitOrderPoolKey);
 
     poolPrice = await getPoolPrice(liqPool);

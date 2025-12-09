@@ -4,9 +4,8 @@ import { CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES } from "
 import { isDeployed, bigintToBytes32,abiEncode } from "../lib/utils";
 import { mintERC20 } from "../lib/erc20";
 import { create2Deploy, deployHookWithFlags } from "./help";
-import { deployMockERC20,ERC20Initial } from "./deploy_mockERC20";
+import { deployMockERC20 } from "./deploy_mockERC20";
 import { deployDynamic, deployLimitOrder } from "./deploy_hooks";
-import { initPoolManager } from "./init";
 import {deployCreate2} from "./deploy_create2";
 
 async function main() {

@@ -2,26 +2,23 @@ import { Contract, Wallet } from "ethers";
 import { ethers } from "hardhat";
 import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, SALT } from "../config";
 import { getPoolPrice, getPoolSqrtPrice, modifyPosition } from "../lib/pool";
-import { getERC20Balance } from "../lib/erc20";
+import { getERC20Balance, isApproved, approveERC20 } from "../lib/erc20";
 import { calculateLiqDelta, calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
 import { ModifyPositionParams } from "../lib/types";
 
-async function removeLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: any): Promise<void> {
-    const liqPool = new Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidityPool'].abi, wallet);
+async function removeLiq(liqPool: Contract, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: any): Promise<void> {
 
     const ticklow = calculateTickFromPriceWithSpacing(priceLower, poolKey.tickSpacing);
     const tickhigh = calculateTickFromPriceWithSpacing(priceUpper, poolKey.tickSpacing);
     const sqrtCurrent = await getPoolSqrtPrice(liqPool);
     const [liqDelta, amount0Rmv, amount1Rmv] = calculateLiqDelta(ticklow, sqrtCurrent, tickhigh, amount0, amount1);
-    console.log(`Attempting to remove liquidity ${liqDelta} to price range [${priceLower}, ${priceUpper}] with amount0&1 [${amount0Rmv.toString()}, ${amount1Rmv.toString()}]`);
+    console.log(`Attempting to remove liquidity ${liqDelta} to price range [${priceLower}, ${priceUpper}] with amount0[${amount0Rmv.toString()}], amount1[${amount1Rmv.toString()}]`);
 
     const modifyPositionParams: ModifyPositionParams = {
         tickLower: ticklow,
         tickUpper: tickhigh,
         liquidityDelta: liqDelta * BigInt(-1),
-        salt: SALT
     };
-
     await modifyPosition(liqPool, modifyPositionParams, "0x00");
 }
 
@@ -45,10 +42,10 @@ async function main(): Promise<void> {
 
     const priceLower = 50;
     const priceUpper = 200;
-    const amount0 = 500n * (10n ** 18n);
-    const amount1 = 500n * (10n ** 18n);
+    const amount0 = 100n;
+    const amount1 = 100n;
 
-    await removeLiq(wallet, priceLower, priceUpper, amount0, amount1, POOL_KEYS.limitOrderPoolKey);
+    await removeLiq(liqPool, priceLower, priceUpper, amount0, amount1, POOL_KEYS.limitOrderPoolKey);
 
     poolPrice = await getPoolPrice(liqPool);
     console.log(`Current price of pool ${liqPool.address} after removing liquidity is ${poolPrice}`);

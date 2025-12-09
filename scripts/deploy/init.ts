@@ -26,11 +26,11 @@ async function main(){
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
     const walletAddress=await wallet.getAddress();
-    // initPoolManager(CONTRACT_ADDRESSES["PoolManager"]);
+    await initPoolManager(CONTRACT_ADDRESSES["PoolManager"]);
 
     // 2. ERC20 initial
     const supply=ethers.utils.parseUnits("210000",18).toBigInt();
-    ERC20Initial(CONTRACT_ADDRESSES["Token0"],walletAddress,supply);
-    ERC20Initial(CONTRACT_ADDRESSES["Token1"],walletAddress,supply);
+    await ERC20Initial(CONTRACT_ADDRESSES["Token0"],walletAddress,supply);
+    await ERC20Initial(CONTRACT_ADDRESSES["Token1"],walletAddress,supply);
 }
 main();

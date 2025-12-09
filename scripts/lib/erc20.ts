@@ -40,7 +40,7 @@ export async function approveERC20(contract: Contract, toAddress: string, amount
 }
 
 export async function getERC20Balance(contract: Contract, address: string): Promise<bigint> {
-    const balance = await contract.balanceOf(address);
+    const balance:bigint = BigInt(await contract.balanceOf(address));
     // console.log(`ERC20 Balance: ${balance.toString()}`);
     return balance;
 }

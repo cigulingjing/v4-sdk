@@ -126,6 +126,7 @@ export function amount1(liquidity1: bigint, pa: bigint, pb: bigint): bigint {
 }
 
 // Simplified version to calculate liquidity delta
+/// @liquidity delta, @amount0 used, @amount1 used
 export function calculateLiqDelta(ticklow: number, sqrt_cur: bigint, tickupp: number, amt0: bigint, amt1: bigint): [bigint, bigint, bigint] {
     const sqrt_low = getSqrtPriceAtTick(ticklow);
     const sqrt_upp = getSqrtPriceAtTick(tickupp);

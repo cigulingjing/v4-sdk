@@ -129,7 +129,24 @@ npx hardhat run scripts/frontend/init/init.ts
         + [失败]提取流动性：`npx hardhat run scripts/frontend/limitorder/withdraw.ts`
     3. 动态手续费：
         + [存疑]调整手续费：`npx hardhat test scripts/feehook/testfeehook.ts`
-
 ## 待完成事项
 
 + 类似挖矿的流动性激励hook合约
+
+# lq documents
+
+## 部署
+|   依赖   |  版本      |
+|   ----   | ----       |
+|    nvm   |  0.39.7    |
+|   npm    | v20.19.5  |
+
+运行命令：
+```shell
+npm install
+
+npx hardhat node # 单独使用命令行执行
+
+npx hardhat run scripts/deploy/deploy.ts
+npx hardhat run scripts/deploy/inits.ts
+```
