@@ -8,7 +8,7 @@ const q256 = BigInt(2) ** BigInt(256);
 // Function to calculate tick from price with optional spacing
 export function calculateTickFromPriceWithSpacing(price: number, tickSpacing = 60): number {
     const unroundedTick = calculateTickFromPrice(price);
-    return Math.round(unroundedTick / tickSpacing) * tickSpacing;
+    return Math.floor(unroundedTick / tickSpacing) * tickSpacing;
 }
 
 // Function to calculate tick from price without spacing

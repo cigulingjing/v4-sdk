@@ -207,6 +207,7 @@ async function depolyContract(contractName: string, params?: any): Promise<Contr
     console.log(`${contractName} deployed to ${contract.address}`);
     return contract;
 }
+
 async function delay(milliseconds: any) {
     // 这个新的 Promise 将在指定的毫秒数后 resolve
     return new Promise(resolve => setTimeout(resolve, milliseconds));

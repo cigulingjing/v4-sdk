@@ -2,6 +2,7 @@ import { Contract, Wallet } from "ethers";
 import {ethers} from "hardhat";
 import { CONTRACT_ADDRESSES, CONTRACTS, PRIVATE_KEY, RPC_URL } from "../config";
 import { getERC20Balance } from "../lib/erc20";
+import { getContract } from "../lib/wallet";
 
 async function withdrawLimitOrder(contract: Contract, epoch: number, to: string): Promise<{ owner: string; epoch: string; liquidity: string; }> {
     try {
@@ -64,17 +65,18 @@ async function main(){
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
-    const token0 = new Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const token0=await getContract(wallet,"Token0");
+    const token1=await getContract(wallet,"Token1");
+    const LimitOrder=await getContract(wallet, "LimitOrder");
 
     const token0Before = await getERC20Balance(token0, wallet.address);
     const token1Before = await getERC20Balance(token1, wallet.address);
     console.log("Token0 balance before adding Limit order:", token0Before.toString());
     console.log("Token1 balance before adding limit order:", token1Before.toString());
 
-    const hook = new Contract(CONTRACT_ADDRESSES.LimitOrder, CONTRACTS['LimitOrder'].abi, wallet);
+   
     const epoch = 1
-    const epo = await withdrawLimitOrder(hook, epoch, wallet.address);
+    const epo = await withdrawLimitOrder(LimitOrder, epoch, wallet.address);
     console.log("epoch:", epo);
 
     const token0After = await getERC20Balance(token0, wallet.address);

@@ -10,6 +10,7 @@ import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
 import {FullMath} from "@uniswap/v4-core/src/libraries/FullMath.sol";
 import {SafeCast} from "@uniswap/v4-core/src/libraries/SafeCast.sol";
 // import {IERC20Minimal} from "@uniswap/v4-core/src/interfaces/external/IERC20Minimal.sol";
+import {IUnlockCallback} from '@uniswap/v4-core/src/interfaces/callback/IUnlockCallback.sol';
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
@@ -33,7 +34,7 @@ library EpochLibrary {
     }
 }
 
-contract LimitOrder  {
+contract LimitOrder is IUnlockCallback{
     using EpochLibrary for Epoch;
     using PoolIdLibrary for PoolKey;
     using CurrencyDelta for Currency;
@@ -155,16 +156,10 @@ contract LimitOrder  {
     }
 
     // see src/base/SafeCallback.sol
-    function _unlockCallback(bytes calldata data) internal returns (bytes memory) {
+    function unlockCallback(bytes calldata data) external returns (bytes memory) {
         bytes4 funcSig = bytes4(data[:4]);
         bytes memory args = bytes(data[4:]);
 
-        /*
-        if (funcSig == this.lockAcquiredFill.selector) {
-            (PoolKey memory key, int24 tickLower, int256 liquidityDelta, bytes32 salt) = abi.decode(args, (PoolKey, int24, int256, bytes32));
-            (uint128 amount0, uint128 amount1) = lockAcquiredFill(key, tickLower, liquidityDelta, salt);
-            return abi.encode(amount0, amount1);
-        } */
         if (funcSig == this.lockAcquiredPlace.selector) {
             (PoolKey memory key, int24 tickLower, bool zeroForOne, int256 liquidityDelta, address owner, bytes32 salt) = abi.decode(args, (PoolKey, int24, bool, int256, address, bytes32));
             lockAcquiredPlace(key, tickLower, zeroForOne, liquidityDelta, owner, salt);
@@ -276,13 +271,12 @@ contract LimitOrder  {
         if (delta.amount1() > 0) poolManager.mint(address(this), key.currency1.toId(), amount1 = uint128(delta.amount1()));
     }
 
-    function place(PoolKey calldata key, int24 tickLower, bool zeroForOne, uint128 liquidity) // , bytes32 salt)
+    function place(PoolKey calldata key, int24 tickLower, bool zeroForOne, uint128 liquidity)
         external
         onlyValidPools(key.hooks)
     {
         if (liquidity == 0) revert ZeroLiquidity();
-
-        // [Custom]
+        // Used to identify liquidity modifications from this.tx.sender, not limitorder contract.
         bytes32 salt = bytes32(uint256(uint160(msg.sender)));
         poolManager.unlock(
             abi.encodeCall(this.lockAcquiredPlace, (key, tickLower, zeroForOne, int256(uint256(liquidity)), msg.sender, salt))
@@ -311,7 +305,6 @@ contract LimitOrder  {
         }
 
         emit Place(msg.sender, epoch, key, tickLower, zeroForOne, liquidity);
-
     }
 
     function lockAcquiredPlace(

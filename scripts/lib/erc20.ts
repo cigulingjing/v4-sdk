@@ -1,9 +1,7 @@
 import { Contract } from "ethers";
-import { ethers } from "hardhat";
 // Check if the spender is approved to spend at least 'amount' tokens from ownerAddress
-export async function isApproved(contract:Contract, ownerAddress: string, spenderAddress: string, amount: bigint) {
+export async function isApproved(contract: Contract, ownerAddress: string, spenderAddress: string, amount: bigint) {
     let allowance = await contract.allowance(ownerAddress, spenderAddress);
-    // console.log(`Allowance: ${allowance.toString()}`);
     if (allowance >= amount) {
         return true;
     }
@@ -12,7 +10,11 @@ export async function isApproved(contract:Contract, ownerAddress: string, spende
     }
 }
 
-
+export async function approveERC20(contract: Contract, spenderAddress: string, amount: bigint) {
+    let tx = await contract.approve(spenderAddress, amount);
+    await tx.wait();
+    console.log(`Approved ${amount} of token to ${spenderAddress}`);
+}
 
 export async function getAllowance(contract: Contract, ownerAddress: string, spenderAddress: string): Promise<bigint> {
     const allowance = await contract.allowance(ownerAddress, spenderAddress);
@@ -22,7 +24,7 @@ export async function getAllowance(contract: Contract, ownerAddress: string, spe
 
 export async function checkAndApproveERC20(contract: Contract, ownerAddress: string, spenderAddress: string, amount: bigint) {
     const allowance = await getAllowance(contract, ownerAddress, spenderAddress);
-    
+
     if (allowance >= amount) {
         console.log(`Sufficient allowance already granted: ${allowance.toString()}`);
         return;
@@ -33,14 +35,8 @@ export async function checkAndApproveERC20(contract: Contract, ownerAddress: str
     console.log(`Transaction hash (approve): ${receipt.transactionHash}`);
 }
 
-export async function approveERC20(contract: Contract, toAddress: string, amount: bigint) {
-    let tx = await contract.approve(toAddress, amount);
-    await tx.wait();
-    console.log(`Approved ${amount} of token to ${toAddress}`);
-}
-
 export async function getERC20Balance(contract: Contract, address: string): Promise<bigint> {
-    const balance:bigint = BigInt(await contract.balanceOf(address));
+    const balance: bigint = BigInt(await contract.balanceOf(address));
     // console.log(`ERC20 Balance: ${balance.toString()}`);
     return balance;
 }

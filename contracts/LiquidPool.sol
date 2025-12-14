@@ -107,7 +107,7 @@ contract LiquidPool is IUnlockCallback {
             _handleSwap(args, recipient);
         } else if (funcSig == FUNCSIG_DONATE) {
             _handleDonate(args, recipient);
-        } else {
+        } else{
             revert InvalidFuncSig();
         }
 

@@ -1,18 +1,18 @@
 import { ethers } from "hardhat";
 import type { Contract } from "ethers";
 import { CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES } from "../config";
-import { bigintToBytes32,bytecodeWithArgs } from "../lib/utils";
+import { bigintToBytes32, bytecodeWithArgs } from "../lib/utils";
 
 // Constants that correspond to the ones in Solidity
 const FLAG_MASK = BigInt(0x3FFF);
 const MAX_LOOP = 100_000;
 
 // create2Deploy deploys a contract using CREATE2 via the Create2 factory contract
-export async function create2Deploy(create2: Contract, contractName: string, types: string[], params: any[], salt: bigint) :Promise<string>{
+export async function create2Deploy(create2: Contract, contractName: string, types: string[], params: any[], salt: bigint): Promise<string> {
 
     // Load the contract artifact using TypeScript
     const scArtifact = CONTRACTS[contractName];
-    if (scArtifact==null){
+    if (scArtifact == null) {
         throw new Error(`Contract artifact for ${contractName} not found`);
     }
     let bytecode = scArtifact.bytecode;
@@ -27,7 +27,7 @@ export async function create2Deploy(create2: Contract, contractName: string, typ
     // console.log(`precomputed ${contractName} address: ${create2Addr}`);
 
     const saltHex = bigintToBytes32(salt);
-    const tx = await create2.deployCreate2WithSalt(initCode,saltHex, { gasLimit: 30_000_000 });
+    const tx = await create2.deployCreate2WithSalt(initCode, saltHex, { gasLimit: 30_000_000 });
     await tx.wait();
 
     console.log(`deterministic deployed ${contractName} by transaction(${tx.hash})`);
@@ -45,7 +45,7 @@ export async function findHookAddress(
     // Load the contract artifact using TypeScript
     const scArtifact = CONTRACTS[contractName];
     const bytecode = scArtifact.bytecode;
-    if (bytecode==undefined || bytecode.length==0){
+    if (bytecode == undefined || bytecode.length == 0) {
         throw new Error(`Bytecode for contract ${contractName} is undefined or empty`);
     }
 

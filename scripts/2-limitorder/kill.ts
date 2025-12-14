@@ -5,29 +5,11 @@ import { calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
 import { PoolKey } from "../lib/types";
 import { getERC20Balance } from "../lib/erc20";
 import { getPoolPrice } from "../lib/pool";
+import { getContract } from "../lib/wallet";
 
-async function killLimitOrder(contract: Contract, poolKey: any, tickLower: number, zeroForOne: boolean, to: string): Promise<void> {
-    const tx = await contract.kill(poolKey, tickLower, zeroForOne, to);
-    await tx.wait();
-    console.log("Kill successfully");
-
-    return new Promise((resolve, reject) => {
-        contract.once("Kill", (owner, epoch, key, tickLower, zeroForOne, liquidity) => {
-            resolve({
-                owner,
-                epoch: epoch.toString(),
-                key,
-                tickLower: tickLower.toString(),
-                zeroForOne,
-                liquidity: liquidity.toString()
-            });
-        });
-    });
-}
-
-async function killLimitOrderFrontend(token0: Contract, token1: Contract, priceLimit: number, poolkey: PoolKey, saltHex: string, wallet: Wallet){
-    const liqPool = new Contract(CONTRACT_ADDRESSES.LiquidPool, CONTRACTS['LiquidityPool'].abi, wallet);
-    const hook = new Contract(CONTRACT_ADDRESSES.LimitOrder, CONTRACTS['LimitOrder'].abi, wallet);
+async function killLimitOrderFrontend(sender: string, priceLimit: number, poolkey: PoolKey, wallet: Wallet){
+    const liqPool = await getContract(wallet, "LiquidPool");
+    const limitHook=await getContract(wallet, "LimitOrder");
 
     const priceCurrent = await getPoolPrice(liqPool);
     const tickcurr = calculateTickFromPriceWithSpacing(priceCurrent, poolkey.tickSpacing)
@@ -44,10 +26,10 @@ async function killLimitOrderFrontend(token0: Contract, token1: Contract, priceL
         throw new Error("Price mismatch for limit order");
     }
 
-    let tx = await hook.kill(poolkey, ticklow, zeroForOne, wallet.address, saltHex);
+    let tx = await limitHook.kill(poolkey, ticklow, zeroForOne, wallet.address);
     await tx.wait();
     
-    await hook.once("Kill", (owner, epoch, key, tickLower, zeroForOne, liquidity, event) => {
+    await limitHook.once("Kill", (owner, epoch, key, tickLower, zeroForOne, liquidity, event) => {
         console.log("Kill event emitted:");
         console.log(`Owner: ${owner}`);
         console.log(`Epoch: ${epoch.toString()}`);
@@ -64,8 +46,8 @@ async function main(): Promise<void> {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
-    const token0 = new Contract(CONTRACT_ADDRESSES.Token0, CONTRACTS['MockERC20Custom'].abi, wallet);
-    const token1 = new Contract(CONTRACT_ADDRESSES.Token1, CONTRACTS['MockERC20Custom'].abi, wallet);
+    const token0=await getContract(wallet,"Token0");
+    const token1=await getContract(wallet,"Token1");
 
     const token0Before = (await getERC20Balance(token0, wallet.address)).valueOf();
     const token1Before = (await getERC20Balance(token1, wallet.address)).valueOf();
@@ -73,7 +55,7 @@ async function main(): Promise<void> {
     console.log("Token1 balance before adding limit order:", token1Before.toString());
 
     const price = PRICE_LIMIT;
-    const epo = await killLimitOrderFrontend(token1, token0, price, POOL_KEYS.limitOrderPoolKey, SALT_LIMITORDER, wallet)
+    const epo = await killLimitOrderFrontend(wallet.address, price, POOL_KEYS.limitOrderPoolKey, wallet)
     console.log("epoch:", epo);
 
     const token0After = (await getERC20Balance(token0, wallet.address)).valueOf();

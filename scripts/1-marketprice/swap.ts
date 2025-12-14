@@ -42,8 +42,9 @@ export async function swap(wallet: Wallet, amountIn: bigint, zeroForOne: boolean
 
     // Check and approve ERC20 tokens if necessary
     const token = zeroForOne ? token0 : token1;
-    if (!(await isApproved(token, wallet.address, liqPool.address, amountIn))) {
-        await approveERC20(token, liqPool.address, amountIn);
+    // Calculate an approval amount with a 1% buffer to account for fees
+    if (!(await isApproved(token, wallet.address, liqPool.address, ethers.constants.MaxUint256.toBigInt()))) {
+        await approveERC20(token, liqPool.address, ethers.constants.MaxUint256.toBigInt());
     }
     // Execute the swap
     await executeSwap(liqPool, swapParams, hookData);
@@ -66,10 +67,12 @@ export async function main(): Promise<void> {
     let poolPrice = await getPoolPrice(liqPool);
     console.log(`Pool price before swapping is ${poolPrice}`);
 
-    const swapAmount = ethers.utils.parseUnits("10", 18).toBigInt(); // Swap 10 tokens
-    const zeroForOne = true;
+    const swapAmount = ethers.utils.parseEther("100").toBigInt(); 
+
+    const zeroForOne = false;
     const x = zeroForOne? 0 : 1;
     console.log(`swap ${swapAmount.toString()} amount of token${1-x} from token${x}`);
+
     // used for LimitOrder.sol afterSwap
     const hookData = ethers.utils.defaultAbiCoder.encode(["bytes32"], [SALT_LIMITORDER]);
     await swap(wallet, swapAmount, zeroForOne, hookData);
@@ -87,7 +90,6 @@ export async function main(): Promise<void> {
     }else{
         const swapPrice = (token1Diff * BigInt(-1000)) / token0Diff;
         const formattedPrice = (Number(swapPrice) / 1000).toFixed(3);
-
         poolPrice = await getPoolPrice(liqPool);
         console.log(`Current Pool Price After Swap: ${poolPrice}, Executed Swap Price: ${formattedPrice}`);
     }

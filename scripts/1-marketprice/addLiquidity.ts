@@ -59,8 +59,8 @@ async function main(): Promise<void> {
 
     const priceLower = 50;
     const priceUpper = 200;
-    const amount0 = 1000n;
-    const amount1 = 1000n;
+    const amount0 = ethers.utils.parseEther("1000").toBigInt();
+    const amount1 = ethers.utils.parseEther("1000").toBigInt();
     await addLiq(wallet, priceLower, priceUpper, amount0, amount1, POOL_KEYS.limitOrderPoolKey);
 
     poolPrice = await getPoolPrice(liqPool);

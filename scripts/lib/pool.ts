@@ -58,3 +58,9 @@ export async function getPoolPrice(liqPool: Contract): Promise<number> {
     // console.log("price:", result.toString());
     return result;
 }
+
+export async function getCurrentTick(liqPool: Contract): Promise<number> {
+    const slot0 = await getSlot0(liqPool);
+    const tick: number = slot0[1];
+    return tick;
+}
