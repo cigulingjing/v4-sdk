@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, PRIVATE_KEY, RPC_URL, SALT_LIMITORDER, PRICE_LIMIT } from "../config";
 import { calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
 import { PoolKey } from "../lib/types";
-import { getERC20Balance } from "../lib/erc20";
+import { getERC20Balance } from "../lib/ERC20";
 import { getPoolPrice } from "../lib/pool";
 import { getContract } from "../lib/wallet";
 
@@ -25,6 +25,7 @@ async function killLimitOrderFrontend(sender: string, priceLimit: number, poolke
     } else {
         throw new Error("Price mismatch for limit order");
     }
+    console.log("Killing limit order, zeroForOne:", zeroForOne);
 
     let tx = await limitHook.kill(poolkey, ticklow, zeroForOne, wallet.address);
     await tx.wait();

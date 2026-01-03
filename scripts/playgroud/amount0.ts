@@ -43,5 +43,5 @@ const numerator2 = sqrtPriceBX96.sub(sqrtPriceAX96);
 const result = calculateAmount0Delta(numerator1, numerator2, sqrtPriceBX96, sqrtPriceAX96);
 console.log(result.toString());
 
-const result2 = amount0(liquidity, sqrtPriceBX96, sqrtPriceAX96);
+const result2 = amount0(liquidity.toBigInt(), sqrtPriceBX96.toBigInt(), sqrtPriceAX96.toBigInt());
 console.log(result2.toString());

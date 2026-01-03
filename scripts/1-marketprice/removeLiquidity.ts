@@ -2,7 +2,7 @@ import { Contract, Wallet } from "ethers";
 import { ethers } from "hardhat";
 import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, SALT } from "../config";
 import { getPoolPrice, getPoolSqrtPrice, modifyPosition } from "../lib/pool";
-import { getERC20Balance, isApproved, approveERC20 } from "../lib/erc20";
+import { getERC20Balance, isApproved, approveERC20 } from "../lib/ERC20";
 import { calculateLiqDelta, calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
 import { ModifyPositionParams } from "../lib/types";
 
@@ -40,8 +40,8 @@ async function main(): Promise<void> {
     console.log("Token0 balance before removing liquidity:", token0Before.toString());
     console.log("Token1 balance before removing liquidity:", token1Before.toString());
 
-    const priceLower = 50;
-    const priceUpper = 200;
+    const priceLower = 0.5;
+    const priceUpper = 1.5;
     const amount0 = 100n;
     const amount1 = 100n;
 

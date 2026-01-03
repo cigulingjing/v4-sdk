@@ -1,7 +1,7 @@
 import { Contract, Wallet } from "ethers";
 import {ethers} from "hardhat";
 import { CONTRACT_ADDRESSES, CONTRACTS, PRIVATE_KEY, RPC_URL } from "../config";
-import { getERC20Balance } from "../lib/erc20";
+import { getERC20Balance } from "../lib/ERC20";
 import { getContract } from "../lib/wallet";
 
 async function withdrawLimitOrder(contract: Contract, epoch: number, to: string): Promise<{ owner: string; epoch: string; liquidity: string; }> {
@@ -9,10 +9,12 @@ async function withdrawLimitOrder(contract: Contract, epoch: number, to: string)
         // Initiate the withdraw transaction
         const tx = await contract.withdraw(epoch, to);
         await tx.wait();
+        console.log("Withdraw executed successfully.");
 
         // Return a promise that resolves when the "Kill" event is emitted
+        // 监听链上事件，如果事件成功则返回结果。
         return new Promise((resolve, reject) => {
-            contract.once("Kill", (owner, eventEpoch, liquidity) => {
+            contract.once("Withdraw", (owner, eventEpoch, liquidity) => {
                 resolve({
                     owner,
                     epoch: eventEpoch.toString(),
@@ -46,20 +48,6 @@ function handleContractError(error: any): void {
     }
 }
 
-async function withdrawLimitOrder_Old(contract: Contract, epoch: number, to: string): Promise<{ owner: string; epoch: string; liquidity: string; }> {
-    const tx = await contract.withdraw(epoch, to);
-    await tx.wait();
-
-    return new Promise((resolve, reject) => {
-        contract.once("Kill", (owner, eventEpoch, liquidity) => {
-            resolve({
-                owner,
-                epoch: eventEpoch.toString(),
-                liquidity: liquidity.toString()
-            });
-        });
-    });
-}
 
 async function main(){
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
@@ -75,7 +63,7 @@ async function main(){
     console.log("Token1 balance before adding limit order:", token1Before.toString());
 
    
-    const epoch = 1
+    const epoch = 1;
     const epo = await withdrawLimitOrder(LimitOrder, epoch, wallet.address);
     console.log("epoch:", epo);
 

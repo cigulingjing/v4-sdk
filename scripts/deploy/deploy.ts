@@ -1,8 +1,8 @@
 import { ethers } from "hardhat";
 import type { Contract } from "ethers";
-import { CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES } from "../config";
+import { CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES, INITAIL_SUPPLY } from "../config";
 import { isDeployed, bigintToBytes32,abiEncode } from "../lib/utils";
-import { mintERC20 } from "../lib/erc20";
+import { mintERC20 } from "../lib/ERC20";
 import { create2Deploy, deployHookWithFlags } from "./help";
 import { deployMockERC20 } from "./deploy_mockERC20";
 import { deployDynamic, deployLimitOrder } from "./deploy_hooks";
@@ -20,7 +20,7 @@ async function main() {
     // console.log("Factory address:", await factory.getAddress());
 
     const salt: bigint = BigInt(0);
-    const initialSupply=ethers.utils.parseUnits("2100000", 18).toBigInt();
+    const initialSupply= INITAIL_SUPPLY;
 
     // 1. Deploy ERC20 tokens
     let token0Addr=await deployMockERC20("bitcoin","btc",initialSupply);

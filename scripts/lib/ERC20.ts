@@ -13,12 +13,10 @@ export async function isApproved(contract: Contract, ownerAddress: string, spend
 export async function approveERC20(contract: Contract, spenderAddress: string, amount: bigint) {
     let tx = await contract.approve(spenderAddress, amount);
     await tx.wait();
-    console.log(`Approved ${amount} of token to ${spenderAddress}`);
 }
 
 export async function getAllowance(contract: Contract, ownerAddress: string, spenderAddress: string): Promise<bigint> {
     const allowance = await contract.allowance(ownerAddress, spenderAddress);
-    console.log(`Allowance: ${allowance.toString()}`);
     return allowance;
 }
 
@@ -26,13 +24,11 @@ export async function checkAndApproveERC20(contract: Contract, ownerAddress: str
     const allowance = await getAllowance(contract, ownerAddress, spenderAddress);
 
     if (allowance >= amount) {
-        console.log(`Sufficient allowance already granted: ${allowance.toString()}`);
         return;
     }
 
     const tx = await contract.approve(spenderAddress, amount);
     const receipt = await tx.wait();
-    console.log(`Transaction hash (approve): ${receipt.transactionHash}`);
 }
 
 export async function getERC20Balance(contract: Contract, address: string): Promise<bigint> {
@@ -44,7 +40,6 @@ export async function getERC20Balance(contract: Contract, address: string): Prom
 export async function transferERC20(contract: Contract, toAddress: string, amount: bigint) {
     const tx = await contract.transfer(toAddress, amount);
     const receipt = await tx.wait();
-    console.log(`Transaction hash (transfer): ${receipt.transactionHash}`);
 }
 
 

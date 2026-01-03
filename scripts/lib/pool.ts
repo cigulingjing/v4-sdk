@@ -6,7 +6,6 @@ export async function modifyPosition(contract: Contract, modifyPositionParams: M
     // Add liquidity
     const tx = await contract.addLiquidity(modifyPositionParams, hookData);
     await tx.wait();
-    console.log("Position modified successfully");
 }
 
 // Function to get Pool ID
@@ -23,9 +22,6 @@ export function getPoolId(poolKey: PoolKey): string {
 
 // Function to get Slot0 of the Pool
 async function getSlot0(contract: Contract) {
-    // const poolId = getPoolId(poolKey);
-    // console.log(`PoolId: ${poolId}`);
-
     const slot0 = await contract.getSlot0();
     // console.log(`Returned slot0: ${JSON.stringify(slot0)}`);
     return slot0;

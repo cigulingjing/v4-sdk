@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
-import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, PRICE_INIT } from "../config";
+import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, PRICE_INIT,INITAIL_SUPPLY } from "../config";
 import { priceToSqrtPrice } from "../lib/liqCalculation";
-import { mintERC20 } from "../lib/erc20";
+import { mintERC20 } from "../lib/ERC20";
 
 // InitPoolManager must be called only token is deployed.
 export async function initPoolManager(contractAddress: string) {
@@ -29,8 +29,11 @@ async function main(){
     await initPoolManager(CONTRACT_ADDRESSES["PoolManager"]);
 
     // 2. ERC20 initial
-    const supply=ethers.utils.parseUnits("210000",18).toBigInt();
+    const supply=INITAIL_SUPPLY;
     await ERC20Initial(CONTRACT_ADDRESSES["Token0"],walletAddress,supply);
     await ERC20Initial(CONTRACT_ADDRESSES["Token1"],walletAddress,supply);
+
+
+    
 }
 main();

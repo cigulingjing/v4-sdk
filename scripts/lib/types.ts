@@ -17,4 +17,5 @@ export interface ModifyPositionParams {
     tickLower: number;
     tickUpper: number;
     liquidityDelta: bigint;
+    salt?:string;
 }

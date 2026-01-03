@@ -11,11 +11,11 @@ export const PRIVATE_KEY = process.env.PRIVATE_KEY || "ac0974bec39a17e36ba4a6b4d
 
 export const CONTRACT_ADDRESSES = {
   Create2: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  Token0: "0x6F282A9aB802c906c61dbE6848F8a8464A1308F7",
-  Token1: "0x8d7F2Bc6785CC4Cc2447551f5702E0E594636c9A",
+  Token0: "0x3e7B83B8bb8eE2D4d74ec805aeb1465e65E15E24",
+  Token1: "0xF4DB8B5cC187B286Eb54Bf76c6b041286a46E4Ee",
   PoolManager: "0xDB0412DaB8210ccA6d9875eE0be7b580A3c12046",
-  LiquidPool: "0xd23bBdeA1Dec9939B28E02A7BA24C4af77a82f67",
-  LimitOrder: "0xDc276DbbA4529Bc8690c80b70BBF63C6e462d040",
+  LiquidPool: "0xBFd16A06062060FA08EFca22e3b6d334EcF3E2f0",
+  LimitOrder: "0x7982Cd1B4162c145e6c1a0f7fD3De4676950D040",
   DynamicFee: "0x541eEcD8E9A59476E436A766123B27330e149040"
 };
 
@@ -54,5 +54,9 @@ export const POOL_KEYS = {
 
 export const SALT = ethers.utils.keccak256("0x00")
 export const SALT_LIMITORDER = ethers.utils.keccak256("0x01")
-export const PRICE_INIT = 100
-export const PRICE_LIMIT = 101
+export const PRICE_INIT = 1 // 1 token0 => PRICE_INIT token1
+export const PRICE_LIMIT = 1.1
+
+
+export const INITAIL_LIQUIDITY = ethers.utils.parseEther("1000").toBigInt();
+export const INITAIL_SUPPLY = ethers.utils.parseEther("210000000").toBigInt();

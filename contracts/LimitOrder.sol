@@ -18,7 +18,7 @@ import {Currency, CurrencyDelta} from "@uniswap/v4-core/src/libraries/CurrencyDe
 import {BalanceDelta, toBalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
 import {BeforeSwapDelta, toBeforeSwapDelta} from "@uniswap/v4-core/src/types/BeforeSwapDelta.sol";
 import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
-
+import "hardhat/console.sol";
 
 type Epoch is uint232;
 
@@ -180,7 +180,6 @@ contract LimitOrder is IUnlockCallback{
 
     function afterInitialize(address, PoolKey calldata key, uint160, int24 tick)
         external
-        // poolManagerOnly
         returns (bytes4)
     {
         setTickLowerLast(key.toId(), getTickLower(tick, key.tickSpacing));
@@ -198,37 +197,28 @@ contract LimitOrder is IUnlockCallback{
         if (lower > upper) return (LimitOrder.afterSwap.selector, 0);
 
         bytes32 salt = abi.decode(hookData, (bytes32));
+        salt=bytes32(0); // 临时修改为0，方便测试""
 
         // note that a zeroForOne swap means that the pool is actually gaining token0, so limit
         // order fills are the opposite of swap fills, hence the inversion below
         bool zeroForOne = !params.zeroForOne;
         for (; lower <= upper; lower += key.tickSpacing) {
             Epoch epoch = getEpoch(key, lower, zeroForOne);
+
             if (!epoch.equals(EPOCH_DEFAULT)) {
                 EpochInfo storage epochInfo = epochInfos[epoch];
-
                 epochInfo.filled = true;
-
-                /*
-                (uint256 amount0, uint256 amount1) = abi.decode(
-                    poolManager.unlock(
-                        abi.encodeCall(this.lockAcquiredFill, (key, lower, -int256(uint256(epochInfo.liquidityTotal)), salt))
-                    ),
-                    (uint256, uint256)
-                );*/
+                console.log("epoch(set true):", uint256(Epoch.unwrap(epoch)));
                 (uint256 amount0, uint256 amount1) = lockAcquiredFill(key, lower, -int256(uint256(epochInfo.liquidityTotal)), salt);
-
                 unchecked {
                     epochInfo.token0Total += amount0;
                     epochInfo.token1Total += amount1;
                 }
-
+                // 惰性删除，等到withdraw再删除
                 setEpoch(key, lower, zeroForOne, EPOCH_DEFAULT);
-
                 emit Fill(epoch, key, lower, zeroForOne);
             }
         }
-
         setTickLowerLast(key.toId(), tickLower);
         return (LimitOrder.afterSwap.selector, 0);
     }
@@ -255,6 +245,12 @@ contract LimitOrder is IUnlockCallback{
         onlyByPoolManager
         returns (uint128 amount0, uint128 amount1)
     {
+        console.log("lockAcquiredFill called with tickLower:", uint256(uint24(tickLower)));
+        console.log("liquidityDelta");
+        console.logInt(liquidityDelta);
+        console.log("salt:");
+        console.logBytes32(salt);
+        //  整形溢出问题。
         (BalanceDelta delta, ) = poolManager.modifyLiquidity(
             key,
             ModifyLiquidityParams({
@@ -265,8 +261,7 @@ contract LimitOrder is IUnlockCallback{
             }),
             hex'00' // used for beforeModifyLiquidity/afterModifyLiquidity
         );
-
-        // [Mark]
+        console.log("lockAcquiredFill liquidity modified.");
         if (delta.amount0() > 0) poolManager.mint(address(this), key.currency0.toId(), amount0 = uint128(delta.amount0()));
         if (delta.amount1() > 0) poolManager.mint(address(this), key.currency1.toId(), amount1 = uint128(delta.amount1()));
     }
@@ -276,8 +271,11 @@ contract LimitOrder is IUnlockCallback{
         onlyValidPools(key.hooks)
     {
         if (liquidity == 0) revert ZeroLiquidity();
+
         // Used to identify liquidity modifications from this.tx.sender, not limitorder contract.
-        bytes32 salt = bytes32(uint256(uint160(msg.sender)));
+        // bytes32 salt = bytes32(uint256(uint160(msg.sender)));
+        bytes32 salt=bytes32(0); // 临时修改为0，方便测试
+
         poolManager.unlock(
             abi.encodeCall(this.lockAcquiredPlace, (key, tickLower, zeroForOne, int256(uint256(liquidity)), msg.sender, salt))
         );
@@ -287,9 +285,6 @@ contract LimitOrder is IUnlockCallback{
         if (epoch.equals(EPOCH_DEFAULT)) {
             unchecked {
                 setEpoch(key, tickLower, zeroForOne, epoch = epochNext);
-                // since epoch was just assigned the current value of epochNext,
-                // this is equivalent to epochNext++, which is what's intended,
-                // and it saves an SLOAD
                 epochNext = epoch.unsafeIncrement();
             }
             epochInfo = epochInfos[epoch];
@@ -298,7 +293,6 @@ contract LimitOrder is IUnlockCallback{
         } else {
             epochInfo = epochInfos[epoch];
         }
-
         unchecked {
             epochInfo.liquidityTotal += liquidity;
             epochInfo.liquidity[msg.sender] += liquidity;
@@ -348,11 +342,13 @@ contract LimitOrder is IUnlockCallback{
         }
     }
 
-    function kill(PoolKey calldata key, int24 tickLower, bool zeroForOne, address to) // , bytes32 salt)
+    function kill(PoolKey calldata key, int24 tickLower, bool zeroForOne, address to) 
         external
         returns (uint256 amount0, uint256 amount1)
     {
         Epoch epoch = getEpoch(key, tickLower, zeroForOne);
+        console.log("[kill] epoch", uint256(Epoch.unwrap(epoch)));
+
         EpochInfo storage epochInfo = epochInfos[epoch];
 
         if (epochInfo.filled) revert Filled();
@@ -360,11 +356,12 @@ contract LimitOrder is IUnlockCallback{
         uint128 liquidity = epochInfo.liquidity[msg.sender];
         if (liquidity == 0) revert ZeroLiquidity();
         delete epochInfo.liquidity[msg.sender];
+        
         uint128 liquidityTotal = epochInfo.liquidityTotal;
         epochInfo.liquidityTotal = liquidityTotal - liquidity;
 
         // [Custom]
-        bytes32 salt = bytes32(uint256(uint160(msg.sender)));
+        bytes32 salt = bytes32(0);
         uint256 amount0Fee;
         uint256 amount1Fee;
         (amount0, amount1, amount0Fee, amount1Fee) = abi.decode(
@@ -404,7 +401,6 @@ contract LimitOrder is IUnlockCallback{
                 key, ModifyLiquidityParams({tickLower: tickLower, tickUpper: tickUpper, liquidityDelta: 0, salt: salt}), hex'00'
             );
 
-            // [Mark]
             if (deltaFee.amount0() > 0) {
                 poolManager.mint(address(this), key.currency0.toId(), amount0Fee = uint128(deltaFee.amount0()));
             }
@@ -432,6 +428,7 @@ contract LimitOrder is IUnlockCallback{
     function withdraw(Epoch epoch, address to) external returns (uint256 amount0, uint256 amount1) {
         EpochInfo storage epochInfo = epochInfos[epoch];
 
+        // 检查限价单是否已经完成
         if (!epochInfo.filled) revert NotFilled();
 
         uint128 liquidity = epochInfo.liquidity[msg.sender];

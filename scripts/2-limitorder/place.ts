@@ -1,7 +1,7 @@
 import type { Contract, Wallet } from "ethers";
 import { CONTRACT_ADDRESSES, CONTRACTS, PRIVATE_KEY, RPC_URL, POOL_KEYS, SALT_LIMITORDER, PRICE_LIMIT } from "../config";
 import { getCurrentTick, getPoolPrice } from "../lib/pool";
-import { getERC20Balance, isApproved, approveERC20 } from "../lib/erc20";
+import { getERC20Balance, isApproved, approveERC20 } from "../lib/ERC20";
 import { calculateTickFromPriceWithSpacing, calculatePriceFromTick, getSqrtPriceAtTick, liquidity0, liquidity1, amount0 } from "../lib/liqCalculation";
 import { PoolKey } from "../lib/types";
 import { ethers } from "hardhat";
@@ -30,7 +30,6 @@ async function placeLimitOrderFrontend(token0: Contract, token1: Contract, amoun
     const ticklow = calculateTickFromPriceWithSpacing(priceLimit, poolKey.tickSpacing);
     const tickhigh = ticklow + poolKey.tickSpacing;
     
-
     const pricelow = calculatePriceFromTick(ticklow);
     const priceupp = calculatePriceFromTick(tickhigh);
 
@@ -44,7 +43,6 @@ async function placeLimitOrderFrontend(token0: Contract, token1: Contract, amoun
     console.log(`Current pool price: ${priceCurrent}, price low: ${pricelow}, price upp: ${priceupp}`);
     console.log(`Tick low: ${ticklow}, Tick high: ${tickhigh}, Current Tick: ${currentTick}`);
 
-    
     let liquidity: bigint;
     let zeroForOne: boolean;
     if (ticklow > currentTick) {
@@ -77,11 +75,9 @@ async function main(){
 
     const token0Before = (await getERC20Balance(token0, wallet.address)).valueOf();
     const token1Before = (await getERC20Balance(token1, wallet.address)).valueOf();
-    console.log("Token0 balance before adding Limit order:", token0Before.toString());
-    console.log("Token1 balance before adding limit order:", token1Before.toString());
 
     const limitPrice = PRICE_LIMIT;
-    const amountIn = ethers.utils.parseEther("20").toBigInt();
+    const amountIn = ethers.utils.parseEther("1000").toBigInt();
     const epo = await placeLimitOrderFrontend(token0, token1, amountIn, limitPrice, POOL_KEYS.limitOrderPoolKey, wallet)
     console.log("epoch:", epo);
 
