@@ -28,9 +28,9 @@ async function main(): Promise<void> {
 
     const liqPoolAddress = CONTRACT_ADDRESSES.LiquidPool;
 
-    const token0=await ethers.getContractAt("MockERC20", CONTRACT_ADDRESSES.Token0, wallet);
-    const token1=await ethers.getContractAt("MockERC20", CONTRACT_ADDRESSES.Token1, wallet);
-    const liqPool=await ethers.getContractAt(CONTRACTS['LiquidPool'].abi,liqPoolAddress,  wallet);
+    const token0 = await ethers.getContractAt("MockERC20", CONTRACT_ADDRESSES.Token0, wallet);
+    const token1 = await ethers.getContractAt("MockERC20", CONTRACT_ADDRESSES.Token1, wallet);
+    const liqPool = await ethers.getContractAt(CONTRACTS['LiquidPool'].abi, liqPoolAddress, wallet);
 
     let poolPrice = await getPoolPrice(liqPool);
     console.log(`Current price of pool ${liqPool.address} before removing liquidity is ${poolPrice}`);

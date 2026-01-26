@@ -150,3 +150,10 @@ npx hardhat node # 单独使用命令行执行
 npx hardhat run scripts/deploy/deploy.ts
 npx hardhat run scripts/deploy/inits.ts
 ```
+## 测试
+voucher测试通过
+
+```shell
+ npx hardhat test test/voucher.ts
+```
+

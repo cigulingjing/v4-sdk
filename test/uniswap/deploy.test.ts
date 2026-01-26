@@ -1,10 +1,10 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { Contract, BigNumber } from "ethers";
-import {CONTRACT_ADDRESSES} from "../scripts/config";
+import { CONTRACT_ADDRESSES } from "../../scripts/uniswap/config";
 
 describe("create2 test", function () {
-    let value=BigInt(1000);
+    let value = BigInt(1000);
     let create2: Contract;
 
     beforeEach(async () => {
@@ -14,10 +14,10 @@ describe("create2 test", function () {
         await create2.deployed();
     });
 
-    it("deploy example.sol",async function() {
+    it("deploy example.sol", async function () {
 
         const Contract = await ethers.getContractFactory("Example");
-        const contract= await Contract.deploy(BigInt(1000));
+        const contract = await Contract.deploy(BigInt(1000));
         await contract.deployed();
 
         const storedValue: BigNumber = await contract.getValue();
@@ -31,13 +31,13 @@ describe("create2 test", function () {
         expect(updatedValue.toBigInt()).to.equal(newValue);
     });
 
-    it ("judge address",async function() {
-        const tokenName="Token0";
-        let tokenAddress= CONTRACT_ADDRESSES[tokenName] ;
-        tokenAddress="0xa8aAB7BbAfC9bb277332b25B3C5BCA74534Df4A7"
-        if (await ethers.provider.getCode(tokenAddress)!="0x") {
+    it("judge address", async function () {
+        const tokenName = "Token0";
+        let tokenAddress = CONTRACT_ADDRESSES[tokenName];
+        tokenAddress = "0xa8aAB7BbAfC9bb277332b25B3C5BCA74534Df4A7"
+        if (await ethers.provider.getCode(tokenAddress) != "0x") {
             console.log(`${tokenName} is deployed at address: ${tokenAddress}`);
-        }else{
+        } else {
             console.log(`${tokenName} is not deployed`);
         }
     });

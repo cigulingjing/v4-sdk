@@ -1,5 +1,5 @@
 import { Contract, Wallet } from "ethers";
-import {ethers} from "hardhat";
+import { ethers } from "hardhat";
 import { CONTRACT_ADDRESSES, CONTRACTS, PRIVATE_KEY, RPC_URL } from "../config";
 import { getERC20Balance } from "../lib/ERC20";
 import { getContract } from "../lib/wallet";
@@ -49,20 +49,20 @@ function handleContractError(error: any): void {
 }
 
 
-async function main(){
+async function main() {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
-    const token0=await getContract(wallet,"Token0");
-    const token1=await getContract(wallet,"Token1");
-    const LimitOrder=await getContract(wallet, "LimitOrder");
+    const token0 = await getContract(wallet, "Token0");
+    const token1 = await getContract(wallet, "Token1");
+    const LimitOrder = await getContract(wallet, "LimitOrder");
 
     const token0Before = await getERC20Balance(token0, wallet.address);
     const token1Before = await getERC20Balance(token1, wallet.address);
     console.log("Token0 balance before adding Limit order:", token0Before.toString());
     console.log("Token1 balance before adding limit order:", token1Before.toString());
 
-   
+
     const epoch = 1;
     const epo = await withdrawLimitOrder(LimitOrder, epoch, wallet.address);
     console.log("epoch:", epo);

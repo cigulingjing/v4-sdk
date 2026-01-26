@@ -7,9 +7,9 @@ import { getERC20Balance } from "../lib/ERC20";
 import { getPoolPrice } from "../lib/pool";
 import { getContract } from "../lib/wallet";
 
-async function killLimitOrderFrontend(sender: string, priceLimit: number, poolkey: PoolKey, wallet: Wallet){
+async function killLimitOrderFrontend(sender: string, priceLimit: number, poolkey: PoolKey, wallet: Wallet) {
     const liqPool = await getContract(wallet, "LiquidPool");
-    const limitHook=await getContract(wallet, "LimitOrder");
+    const limitHook = await getContract(wallet, "LimitOrder");
 
     const priceCurrent = await getPoolPrice(liqPool);
     const tickcurr = calculateTickFromPriceWithSpacing(priceCurrent, poolkey.tickSpacing)
@@ -21,7 +21,7 @@ async function killLimitOrderFrontend(sender: string, priceLimit: number, poolke
     if (tickcurr < ticklow) {
         zeroForOne = true;
     } else if (tickcurr > tickhigh) {
-        zeroForOne = false; 
+        zeroForOne = false;
     } else {
         throw new Error("Price mismatch for limit order");
     }
@@ -29,7 +29,7 @@ async function killLimitOrderFrontend(sender: string, priceLimit: number, poolke
 
     let tx = await limitHook.kill(poolkey, ticklow, zeroForOne, wallet.address);
     await tx.wait();
-    
+
     await limitHook.once("Kill", (owner, epoch, key, tickLower, zeroForOne, liquidity, event) => {
         console.log("Kill event emitted:");
         console.log(`Owner: ${owner}`);
@@ -38,7 +38,7 @@ async function killLimitOrderFrontend(sender: string, priceLimit: number, poolke
         console.log(`TickLower: ${tickLower.toString()}`);
         console.log(`ZeroForOne: ${zeroForOne}`);
         console.log(`Liquidity: ${liquidity.toString()}`);
-    
+
         // Handle event here
     });
 }
@@ -47,8 +47,8 @@ async function main(): Promise<void> {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
-    const token0=await getContract(wallet,"Token0");
-    const token1=await getContract(wallet,"Token1");
+    const token0 = await getContract(wallet, "Token0");
+    const token1 = await getContract(wallet, "Token1");
 
     const token0Before = (await getERC20Balance(token0, wallet.address)).valueOf();
     const token1Before = (await getERC20Balance(token1, wallet.address)).valueOf();

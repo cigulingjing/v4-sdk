@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
-import { CONTRACT_ADDRESSES, CONTRACTS } from "../../scripts/config";
+import { CONTRACT_ADDRESSES, CONTRACTS } from "../../scripts/uniswap/config";
 
 function encoder(types: string[], values: any[]): string {
     const abiCoder = ethers.AbiCoder.defaultAbiCoder();
@@ -25,7 +25,7 @@ export default buildModule("LimitOrder", (m) => {
         deployedBytecode: contractArtifact.bytecode.object,
         linkReferences: {},
         deployedLinkReferences: {},
-      };
+    };
 
     // Deploy the contract
     const limitOrder = m.contract("LimitOrder", artifact, params);

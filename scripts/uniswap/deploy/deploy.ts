@@ -1,12 +1,12 @@
 import { ethers } from "hardhat";
 import type { Contract } from "ethers";
-import { CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES, INITAIL_SUPPLY } from "../config";
-import { isDeployed, bigintToBytes32,abiEncode } from "../lib/utils";
+import { CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES, INITIAL_SUPPLY } from "../config";
+import { isDeployed, bigintToBytes32, abiEncode } from "../lib/utils";
 import { mintERC20 } from "../lib/ERC20";
 import { create2Deploy, deployHookWithFlags } from "./help";
 import { deployMockERC20 } from "./deploy_mockERC20";
 import { deployDynamic, deployLimitOrder } from "./deploy_hooks";
-import {deployCreate2} from "./deploy_create2";
+import { deployCreate2 } from "./deploy_create2";
 
 async function main() {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
@@ -14,23 +14,23 @@ async function main() {
     const walletAddress = await wallet.getAddress();
 
     // 1. Deploy Create2 factory 
-    const create2Address=await deployCreate2(wallet);
+    const create2Address = await deployCreate2(wallet);
     if (!await isDeployed(provider, create2Address)) throw new Error("Factory is not deployed");
     const factory = await ethers.getContractAt("Create2", create2Address, wallet);
     // console.log("Factory address:", await factory.getAddress());
 
     const salt: bigint = BigInt(0);
-    const initialSupply= INITAIL_SUPPLY;
+    const initialSupply = INITIAL_SUPPLY;
 
     // 1. Deploy ERC20 tokens
-    let token0Addr=await deployMockERC20("bitcoin","btc",initialSupply);
-    let token1Addr=await deployMockERC20("ethereum","eth",initialSupply);
+    let token0Addr = await deployMockERC20("bitcoin", "btc", initialSupply);
+    let token1Addr = await deployMockERC20("ethereum", "eth", initialSupply);
 
     // ensure token0Addr < token1Addr, for poolmanager poolkey check
-    if (token0Addr>token1Addr) {
-        const temp=token0Addr;
-        token0Addr=token1Addr;
-        token1Addr=temp;
+    if (token0Addr > token1Addr) {
+        const temp = token0Addr;
+        token0Addr = token1Addr;
+        token1Addr = temp;
     }
 
     // 2. Deploy poolManager.sol
@@ -38,17 +38,17 @@ async function main() {
     const poolManagerAddr = await create2Deploy(factory, "PoolManager", ["address"], [liquidityProvider], salt);
 
     // 3.1 Deploy DynamicFee Hook and limit order hook.
-    let dynamicAddress = await deployDynamic(create2Address,poolManagerAddr);
-    let limitOrderAddress=await deployLimitOrder(create2Address,poolManagerAddr);
+    let dynamicAddress = await deployDynamic(create2Address, poolManagerAddr);
+    let limitOrderAddress = await deployLimitOrder(create2Address, poolManagerAddr);
 
     // 4. Deploy liquidity
     let key = POOL_KEYS.limitOrderPoolKey; // old poolkey, need to update.
     key.currency0 = token0Addr;
     key.currency1 = token1Addr;
-    key.hooks=limitOrderAddress;
+    key.hooks = limitOrderAddress;
 
     const liquidityPoolAddr = await create2Deploy(factory, "LiquidPool", ["address", "(address,address,uint24,int24,address)"], [poolManagerAddr, Object.values(key)], salt);
-    
+
 
     // 5. Output deployed addresses
     console.log("---- Deployed Addresses ----");

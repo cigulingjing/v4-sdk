@@ -1,0 +1,3 @@
+[submodule "contracts/auction/coinbase-and-stake"]
+	path = contracts/auction/coinbase-and-stake
+	url = git@github.com:LazyDreamingDog/coinbase-and-stake.git

@@ -29,14 +29,14 @@ async function placeLimitOrder(contract: Contract, poolKey: any, tickLower: numb
 async function placeLimitOrderFrontend(token0: Contract, token1: Contract, amountIn: bigint, priceLimit: number, poolKey: PoolKey, wallet: Wallet): Promise<any> {
     const ticklow = calculateTickFromPriceWithSpacing(priceLimit, poolKey.tickSpacing);
     const tickhigh = ticklow + poolKey.tickSpacing;
-    
+
     const pricelow = calculatePriceFromTick(ticklow);
     const priceupp = calculatePriceFromTick(tickhigh);
 
     const sqrt_low = getSqrtPriceAtTick(ticklow);
     const sqrt_upp = getSqrtPriceAtTick(tickhigh);
-    
-    const liqPool = await getContract(wallet,"LiquidPool");
+
+    const liqPool = await getContract(wallet, "LiquidPool");
     const currentTick = await getCurrentTick(liqPool);
     const priceCurrent = await getPoolPrice(liqPool);
 
@@ -47,7 +47,7 @@ async function placeLimitOrderFrontend(token0: Contract, token1: Contract, amoun
     let zeroForOne: boolean;
     if (ticklow > currentTick) {
         zeroForOne = true;
-        liquidity = liquidity0(amountIn, sqrt_low, sqrt_upp);        
+        liquidity = liquidity0(amountIn, sqrt_low, sqrt_upp);
         if (!(await isApproved(token0, wallet.address, CONTRACT_ADDRESSES.LimitOrder, amountIn))) {
             await approveERC20(token0, CONTRACT_ADDRESSES.LimitOrder, amountIn);
         }
@@ -66,12 +66,12 @@ async function placeLimitOrderFrontend(token0: Contract, token1: Contract, amoun
     return epoch;
 }
 
-async function main(){
+async function main() {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
-    const token0= await getContract(wallet,"Token0");
-    const token1= await getContract(wallet,"Token1");
+    const token0 = await getContract(wallet, "Token0");
+    const token1 = await getContract(wallet, "Token1");
 
     const token0Before = (await getERC20Balance(token0, wallet.address)).valueOf();
     const token1Before = (await getERC20Balance(token1, wallet.address)).valueOf();

@@ -1,18 +1,20 @@
 import type { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-ethers" // ethers v5, conflict with  
 import "@nomicfoundation/hardhat-chai-matchers"; // Test chai matchers
+import * as dotenv from "dotenv";
+
+// 加载环境变量
+dotenv.config();
 
 const config: HardhatUserConfig = {
-  defaultNetwork: "localhost",
+  // defaultNetwork: "localhost",
   networks: {
     hardhat: {
-      gas: 210000, 
-      blockGasLimit: 80000000, 
+      
     },
     localhost: {
-      url: "http://127.0.0.1:8545",
-      gas: 30000000, 
-      blockGasLimit: 80000000, 
+      url: process.env.RPC_URL || "http://127.0.0.1:8545",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     }
   },
   solidity: {
