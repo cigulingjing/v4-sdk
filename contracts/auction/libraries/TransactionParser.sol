@@ -30,9 +30,7 @@ library TransactionParser {
     function parseRawTransaction(bytes memory rawTx) internal pure returns (RawTransaction memory) {
         RLPReader.RLPItem[] memory items = rawTx.toRlpItem().toList();
         require(items.length == 9, "Invalid transaction format");
-
-        console.log("items length:", items.length);
-
+        
         return RawTransaction({
             nonce: items[0].toUint(),
             gasPrice: items[1].toUint(),

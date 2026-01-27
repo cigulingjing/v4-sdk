@@ -1,32 +1,33 @@
 
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
-import { getAuctionID, buildXReceipt, buildSignedTx } from "../../lib/serialize";
+import { getAuctionID, buildAuctionCreatedReceipt, buildAuctionCreatedTx } from "../../lib/serialize";
 
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
-import type { Contract } from "ethers";
-
-
+import type { Contract, Wallet } from "ethers";
 
 describe("ChainXAuctionV2", function () {
     let chainXAuction: Contract;
     let owner: any;
     let seller: any;
-    let sellerPk: any;
+    let sellerWallet: Wallet;
     let bidder1: any;
     let bidder2: any;
-    let vaultAddress: any;
+    let vaultAddress: string;
 
     // 测试数据
-    const auctionType = BigInt(0x00000001); // 普通公开竞标与秘密竞标区分。
-    const sourceChainId = 31337; // 源链ID
+    const auctionType = 0x00000001;
+    const sourceChainId = 31337;
+    const activeAuctionsCount = BigInt(0);
     const gasPrice = ethers.utils.parseUnits("1", "gwei").toBigInt();
     const gasLimit = BigInt(52_200);
 
     beforeEach(async function () {
         [owner, bidder1, bidder2] = await ethers.getSigners();
         seller = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
-        sellerPk = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+        let sellerPk = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+        sellerWallet = new ethers.Wallet(sellerPk);
+        
         vaultAddress = "0x59b670e9fA9D0A427751Af201D676719a970857b";
 
         const ChainXAuctionV2 = await ethers.getContractFactory("ChainXAuctionV2");
@@ -40,10 +41,13 @@ describe("ChainXAuctionV2", function () {
             const latestTs = (await ethers.provider.getBlock("latest")).timestamp;
             const revealStartTime = latestTs + 1;
 
-            const auctionId: string = getAuctionID(seller, sourceChainId, vaultAddress, nonce);
-            const { rawTx } = await buildSignedTx(sellerPk, vaultAddress, BigInt(0), "", gasPrice, gasLimit, BigInt(nonce), sourceChainId);
+            const auctionId: string = getAuctionID(seller, sourceChainId, vaultAddress, activeAuctionsCount);
+
+            // 构造链Y的createAuciton交易sellerWallet
+            const rawTx = await buildAuctionCreatedTx(sellerWallet, sourceChainId);
+
             const parsedTx = ethers.utils.parseTransaction(rawTx);
-            console.log("parsed from", parsedTx.from, "v", parsedTx.v, "chainId", parsedTx.chainId);
+            console.log("parsed from:", parsedTx.from, "v:", parsedTx.v, "chainId:", parsedTx.chainId,"txHash:",parsedTx.hash);
 
             const debug = await chainXAuction.debugRecover(rawTx);
             console.log(
@@ -57,8 +61,16 @@ describe("ChainXAuctionV2", function () {
                 "value", debug[7].toString(),
             );
 
-            const logAddress = "0x307833383843383138434138423932353162333933313331433038613733364136376363423139323937";
-            const rawRecpt = buildXReceipt(sourceChainId, BigInt(0), BigInt(21000), auctionId, auctionType, BigInt(revealStartTime), logAddress);
+
+            // 构造Tx对应的Receipt
+            const logAddress = "0x3078333838433831384341384239323531623339";
+            const rawRecpt = buildAuctionCreatedReceipt({
+                auctionId,
+                auctionType: Number(auctionType),
+                activeAuctionCount: BigInt(activeAuctionsCount),
+                revealTime: BigInt(revealStartTime),
+                logAddress
+            });
 
             const crossChainMessage = ethers.utils.defaultAbiCoder.encode(
                 ["tuple(uint256 sourceChainId, bytes rawTransaction, bytes rawRecpt)"],
@@ -77,33 +89,17 @@ describe("ChainXAuctionV2", function () {
         beforeEach(async function () {
             const nonce = await ethers.provider.getTransactionCount(seller);
             const latestTs = (await ethers.provider.getBlock("latest")).timestamp;
-            const revealStartTime = latestTs + 1;
+            const revealTime = BigInt(latestTs + 1);
+            let activeAuctionCount = BigInt(0);
+            auctionId = getAuctionID(seller, sourceChainId, vaultAddress, activeAuctionCount);
 
-            auctionId = getAuctionID(seller, sourceChainId, vaultAddress, nonce);
-
-            const { rawTx } = await buildSignedTx({
-                privateKey: sellerPk,
-                to: vaultAddress,
-                value: 0,
-                gasPrice: ethers.utils.parseUnits("1", "gwei"),
-                gasLimit: 52_200,
-                nonce,
-                chainId: sourceChainId,
-            });
+            const { rawTx } = await buildAuctionCreatedTx(sellerWallet,sourceChainId);
             const logAddress = "0x307833383843383138434138423932353162333933313331433038613733364136376363423139323937";
-            const rawRecpt = buildXReceipt({
-                auctionId,
-                auctionType,
-                activeAuctionCount: nonce,
-                revealTime: revealStartTime,
-                logAddress,
-            });
-
+            const rawRecpt = buildAuctionCreatedReceipt({ auctionId, auctionType, activeAuctionCount, revealTime, logAddress });
             const crossChainMessage = ethers.utils.defaultAbiCoder.encode(
                 ["tuple(uint256 sourceChainId, bytes rawTransaction, bytes rawRecpt)"],
                 [[sourceChainId, rawTx, rawRecpt]]
             );
-
             await chainXAuction.createAuction(crossChainMessage);
         });
 
@@ -151,26 +147,18 @@ describe("ChainXAuctionV2", function () {
 
         beforeEach(async function () {
             const latestTs = (await ethers.provider.getBlock("latest")).timestamp;
-            const revealStartTime = latestTs + 1;
-            const nonce = await ethers.provider.getTransactionCount(seller);
+            const revealTime = BigInt(latestTs + 1);
+            const activeAuctionCount = BigInt(0);
 
-            auctionId = getAuctionID(seller, sourceChainId, vaultAddress, nonce);
+            auctionId = getAuctionID(seller, sourceChainId, vaultAddress, activeAuctionCount);
 
-            const { rawTx } = await buildSignedTx({
-                privateKey: sellerPk,
-                to: vaultAddress,
-                value: 0,
-                gasPrice: ethers.utils.parseUnits("1", "gwei"),
-                gasLimit: 52_200,
-                nonce,
-                chainId: sourceChainId,
-            });
+            const { rawTx } = await buildAuctionCreatedTx(sellerWallet,sourceChainId);
             const logAddress = "0x307833383843383138434138423932353162333933313331433038613733364136376363423139323937";
-            const rawRecpt = buildXReceipt({
+            const rawRecpt = buildAuctionCreatedReceipt({
                 auctionId,
                 auctionType,
-                activeAuctionCount: nonce,
-                revealTime: revealStartTime,
+                activeAuctionCount,
+                revealTime,
                 logAddress,
             });
 

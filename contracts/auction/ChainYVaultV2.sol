@@ -290,5 +290,9 @@ contract ChainYVaultV2 is ReentrancyGuard, Ownable,CoinbaseOperator {
         );
     }
 
+    function getActiveAuctionsCount() external view returns (uint256){
+        return activeAuctionsCount;
+    }
+
     receive() external payable {}
 } 

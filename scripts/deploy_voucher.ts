@@ -1,0 +1,14 @@
+import { ethers } from "hardhat";
+import { RPC_URL, PRIVATE_KEY } from "../config/env.config";
+
+async function main() {
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+    const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+    const walletAddress = await wallet.getAddress();
+
+    // Normal deploy
+    const MutiVoucherFactory = await ethers.getContractFactory("MutiVoucher", wallet);
+    const Voucher = await MutiVoucherFactory.deploy(0);
+    await Voucher.deployed();
+    console.log(`MutiVoucher contract is deployed at: ${Voucher.address} by account(${walletAddress})`);
+};
