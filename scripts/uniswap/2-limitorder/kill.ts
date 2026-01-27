@@ -1,6 +1,6 @@
 import { Contract, Wallet } from "ethers";
 import { ethers } from "hardhat";
-import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, PRIVATE_KEY, RPC_URL, SALT_LIMITORDER, PRICE_LIMIT } from "../config";
+import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, PRIVATE_KEY, RPC_URL, SALT_LIMITORDER, PRICE_LIMIT } from "../../../config/uniswap.config";
 import { calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
 import { PoolKey } from "../lib/types";
 import { getERC20Balance } from "../lib/ERC20";

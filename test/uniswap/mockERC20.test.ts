@@ -1,8 +1,7 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { Contract, Signer, BigNumber } from "ethers";
-import { CONTRACTS, CONTRACT_ADDRESSES, PRIVATE_KEY, RPC_URL } from "../../scripts/uniswap/config";
-import { deployMockERC20 } from "../scripts/deploy/deploy_mockERC20"
+import { CONTRACTS, CONTRACT_ADDRESSES, PRIVATE_KEY, RPC_URL } from "../../config/uniswap.config";
 
 describe("MockERC20", function () {
     let token: Contract;

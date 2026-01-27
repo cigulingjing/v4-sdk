@@ -1,7 +1,8 @@
 import{ethers} from "hardhat";
-import { RPC_URL, PRIVATE_KEY,CONTRACT_ADDRESSES } from "../config";
+import { RPC_URL, PRIVATE_KEY,CONTRACT_ADDRESSES } from "../../../config/uniswap.config";
 import { isDeployed } from "../lib/utils";
 import { create2Deploy } from "./help";
+import { getContract } from "../lib/wallet";
 
 async function main(){
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
@@ -19,13 +20,11 @@ async function main(){
     // Create2 deploy
     const factoryAddr = CONTRACT_ADDRESSES["Create2"]
     if (!await isDeployed(provider, factoryAddr)) throw new Error("Factory is not deployed");
-    const create2Contract = await ethers.getContractAt("Create2", factoryAddr, wallet);
+    const create2Contract = await getContract(wallet,"Create2");
     const salt: bigint = BigInt(111);
     let exampleAddr = await create2Deploy(create2Contract, "Example", ["uint256"], [0], salt);
     console.log(`create2 deployed at: ${exampleAddr} by ${walletAddress}`);
 };
-
-
 
 
 main()

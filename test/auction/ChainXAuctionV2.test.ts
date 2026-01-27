@@ -44,7 +44,7 @@ describe("ChainXAuctionV2", function () {
             const auctionId: string = getAuctionID(seller, sourceChainId, vaultAddress, activeAuctionsCount);
 
             // 构造链Y的createAuciton交易sellerWallet
-            const rawTx = await buildAuctionCreatedTx(sellerWallet, sourceChainId);
+            const rawTx = await buildAuctionCreatedTx(sellerWallet,nonce,gasPrice,gasLimit,vaultAddress,BigInt(0),"0x",sourceChainId);
 
             const parsedTx = ethers.utils.parseTransaction(rawTx);
             console.log("parsed from:", parsedTx.from, "v:", parsedTx.v, "chainId:", parsedTx.chainId,"txHash:",parsedTx.hash);
@@ -93,7 +93,7 @@ describe("ChainXAuctionV2", function () {
             let activeAuctionCount = BigInt(0);
             auctionId = getAuctionID(seller, sourceChainId, vaultAddress, activeAuctionCount);
 
-            const { rawTx } = await buildAuctionCreatedTx(sellerWallet,sourceChainId);
+            const rawTx = await buildAuctionCreatedTx(sellerWallet,nonce,gasPrice,gasLimit,vaultAddress,BigInt(0),"0x",sourceChainId);
             const logAddress = "0x307833383843383138434138423932353162333933313331433038613733364136376363423139323937";
             const rawRecpt = buildAuctionCreatedReceipt({ auctionId, auctionType, activeAuctionCount, revealTime, logAddress });
             const crossChainMessage = ethers.utils.defaultAbiCoder.encode(
@@ -143,16 +143,17 @@ describe("ChainXAuctionV2", function () {
 
     describe("匹配结果管理", function () {
         let auctionId: string;
-        let lockId: bigint;
+        let lockId: string;
 
         beforeEach(async function () {
             const latestTs = (await ethers.provider.getBlock("latest")).timestamp;
             const revealTime = BigInt(latestTs + 1);
             const activeAuctionCount = BigInt(0);
+            const nonce = await ethers.provider.getTransactionCount(seller);
 
             auctionId = getAuctionID(seller, sourceChainId, vaultAddress, activeAuctionCount);
 
-            const { rawTx } = await buildAuctionCreatedTx(sellerWallet,sourceChainId);
+            const rawTx = await buildAuctionCreatedTx(sellerWallet,nonce,gasPrice,gasLimit,vaultAddress,BigInt(0),"0x",sourceChainId);
             const logAddress = "0x307833383843383138434138423932353162333933313331433038613733364136376363423139323937";
             const rawRecpt = buildAuctionCreatedReceipt({
                 auctionId,
@@ -184,13 +185,12 @@ describe("ChainXAuctionV2", function () {
                 { value: depositAmount }
             );
 
-            let lockhash = ethers.utils.keccak256(
+            lockId = ethers.utils.keccak256(
                 ethers.utils.solidityPack(
                     ["uint256", "address", "uint256", "address", "bytes32", "uint32"],
                     [sourceChainId, vaultAddress, auctionId, seller, secretHash, auctionType]
                 )
             );
-            lockId = BigInt(lockhash);
 
             // fast-forward beyond reveal + bid periods so submitMatchResults is allowed
             await network.provider.send("evm_increaseTime", [7200]);

@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { Contract, BigNumber } from "ethers";
-import { CONTRACT_ADDRESSES } from "../../scripts/uniswap/config";
+import { CONTRACT_ADDRESSES } from "../config/uniswap.config";
 
 describe("create2 test", function () {
     let value = BigInt(1000);

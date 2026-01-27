@@ -1,6 +1,7 @@
 import { ethers } from "hardhat";
 import { deployHookWithFlags } from "./help";
-import { CONTRACT_ADDRESSES } from "../config";
+import { CONTRACT_ADDRESSES, RPC_URL, PRIVATE_KEY } from "../../../config/uniswap.config";
+import { Wallet } from "ethers";
 
 // Define the extended flags
 const ALL_HOOK_MASK = BigInt((1 << 14) - 1);
@@ -20,9 +21,9 @@ const AFTER_ADD_LIQUIDITY_RETURNS_DELTA_FLAG = BigInt(1 << 1);
 const AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA_FLAG = BigInt(1 << 0);
 
 // Deploy DynamicFee hooks to pool manager
-export async function deployDynamic(Create2Addr: string, poolManagerAddr:string) : Promise<string>{
-    const factory=await ethers.getContractAt("Create2", Create2Addr);
-    const factoryAddr=Create2Addr;
+export async function deployDynamic(wallet:Wallet,Create2Addr: string, poolManagerAddr:string) : Promise<string>{
+    const factory=await ethers.getContractAt("Create2", Create2Addr,wallet);
+    const factoryAddr=factory.address;
 
     const flagFee: bigint = AFTER_SWAP_FLAG | AFTER_INITIALIZE_FLAG;
     const dynamicFeeHook = await deployHookWithFlags(
@@ -36,10 +37,9 @@ export async function deployDynamic(Create2Addr: string, poolManagerAddr:string)
     return dynamicFeeHook;
 }
 
-
-export async function deployLimitOrder(Create2Addr: string, poolManagerAddr:string) : Promise<string>{
-    const factory=await ethers.getContractAt("Create2", Create2Addr);
-    const factoryAddr=Create2Addr;
+export async function deployLimitOrder(wallet:Wallet, Create2Addr: string, poolManagerAddr:string) : Promise<string>{
+    const factory=await ethers.getContractAt("Create2", Create2Addr,wallet);
+    const factoryAddr=factory.address;
 
     // Deploy LimitOrder Hook
     const flagLimit: bigint = AFTER_INITIALIZE_FLAG | AFTER_SWAP_FLAG; // | AFTER_SWAP_RETURNS_DELTA_FLAG;
@@ -52,4 +52,23 @@ export async function deployLimitOrder(Create2Addr: string, poolManagerAddr:stri
         flagLimit
     );
     return limitOrderHook;
+}
+
+async function deployDemo(){
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+    const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+
+    const dynamicAddress=await deployDynamic(wallet,CONTRACT_ADDRESSES.Create2, CONTRACT_ADDRESSES.PoolManager);
+    const limitOrderAddress=await deployLimitOrder(wallet,CONTRACT_ADDRESSES.Create2, CONTRACT_ADDRESSES.PoolManager);
+
+    if (await provider.getCode(dynamicAddress) === "0x") {
+        console.error("DynamicFee hook deployment failed");
+    }
+    if (await provider.getCode(limitOrderAddress) === "0x") {
+        console.error("LimitOrder hook deployment failed");
+    }
+}
+
+if (require.main === module) {
+    deployDemo();
 }

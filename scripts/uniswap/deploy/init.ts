@@ -1,7 +1,9 @@
 import { ethers } from "hardhat";
-import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, PRICE_INIT, INITIAL_SUPPLY } from "../config";
+import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, PRICE_INIT, INITIAL_SUPPLY } from "../../../config/uniswap.config";
 import { priceToSqrtPrice } from "../lib/liqCalculation";
-import { mintERC20 } from "../lib/ERC20";
+import { getERC20Balance, mintERC20 } from "../lib/ERC20";
+import { getContract } from "../lib/wallet";
+import { Wallet } from "ethers";
 
 // InitPoolManager must be called only token is deployed.
 export async function initPoolManager(contractAddress: string) {
@@ -15,25 +17,30 @@ export async function initPoolManager(contractAddress: string) {
     await constract.initialize(POOL_KEYS.dynamicFeePoolKey, sqrtPriceX96);
 }
 
-export async function ERC20Initial(tokenAddress: string, walletAddress: string, supply: bigint) {
-    const token = await ethers.getContractAt("MockERC20", tokenAddress);
-    mintERC20(token, walletAddress, supply);
-}
+export async function ERC20Initial(wallet: Wallet, contractName: string, account:string, supply: bigint) {
+    const token = await getContract(wallet, contractName);
+    await mintERC20(token, account, supply);
 
+    // 检查是否初始化成功
+    const balance = await getERC20Balance(token,account)
+    if (balance !== supply) {
+        throw new Error(`${contractName} mint failed. Acount ${account} balance is ${balance}, expected ${supply}`);
+    }
+}
 
 async function main() {
     // 1. PoolManager initial
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
     const walletAddress = await wallet.getAddress();
-    await initPoolManager(CONTRACT_ADDRESSES["PoolManager"]);
+    // await initPoolManager(CONTRACT_ADDRESSES["PoolManager"]);
 
     // 2. ERC20 initial
     const supply = INITIAL_SUPPLY;
-    await ERC20Initial(CONTRACT_ADDRESSES["Token0"], walletAddress, supply);
-    await ERC20Initial(CONTRACT_ADDRESSES["Token1"], walletAddress, supply);
-
-
-
+    await ERC20Initial(wallet,"Token0", walletAddress, supply);
+    await ERC20Initial(wallet,"Token1", walletAddress, supply);
 }
-main();
+
+if (require.main === module) {
+    main();
+}

@@ -1,6 +1,5 @@
 import { ethers } from "hardhat"; // Import ethers from 
 import type { Wallet } from "ethers";
-import { RPC_URL, PRIVATE_KEY } from "../config";
 import { ContractFactory, Contract } from "ethers";
 
 export async function deployCreate2(wallet : Wallet): Promise<string> {  

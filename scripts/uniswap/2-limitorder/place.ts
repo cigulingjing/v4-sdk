@@ -1,5 +1,5 @@
 import type { Contract, Wallet } from "ethers";
-import { CONTRACT_ADDRESSES, CONTRACTS, PRIVATE_KEY, RPC_URL, POOL_KEYS, SALT_LIMITORDER, PRICE_LIMIT } from "../config";
+import { CONTRACT_ADDRESSES, CONTRACTS, PRIVATE_KEY, RPC_URL, POOL_KEYS, SALT_LIMITORDER, PRICE_LIMIT } from "../../../config/uniswap.config";
 import { getCurrentTick, getPoolPrice } from "../lib/pool";
 import { getERC20Balance, isApproved, approveERC20 } from "../lib/ERC20";
 import { calculateTickFromPriceWithSpacing, calculatePriceFromTick, getSqrtPriceAtTick, liquidity0, liquidity1, amount0 } from "../lib/liqCalculation";

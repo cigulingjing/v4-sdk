@@ -202,6 +202,7 @@ contract ChainXAuctionV2 is ReentrancyGuard, Ownable {
 
         console.logBytes32(txHash);
         console.log("vAdj:", vAdj);
+        console.log("chainID:",chainIdSig);
         console.log("sender address:", sender);
     
 

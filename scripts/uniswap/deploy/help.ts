@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import type { Contract } from "ethers";
-import { CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES } from "../config";
+import { CONTRACTS } from "../../../config/uniswap.config";
 import { bigintToBytes32, bytecodeWithArgs } from "../lib/utils";
 
 // Constants that correspond to the ones in Solidity
@@ -27,6 +27,9 @@ export async function create2Deploy(create2: Contract, contractName: string, typ
     // console.log(`precomputed ${contractName} address: ${create2Addr}`);
 
     const saltHex = bigintToBytes32(salt);
+
+    console.log("create2 address",create2.address);
+
     const tx = await create2.deployCreate2WithSalt(initCode, saltHex, { gasLimit: 30_000_000 });
     await tx.wait();
 
@@ -43,8 +46,7 @@ export async function findHookAddress(
     flags: bigint
 ): Promise<{ hookAddress: string, salt: bigint }> {
     // Load the contract artifact using TypeScript
-    const scArtifact = CONTRACTS[contractName];
-    const bytecode = scArtifact.bytecode;
+    const bytecode = CONTRACTS[contractName].bytecode;
     if (bytecode == undefined || bytecode.length == 0) {
         throw new Error(`Bytecode for contract ${contractName} is undefined or empty`);
     }
@@ -89,12 +91,6 @@ export async function deployHookWithFlags(factory: Contract, factoryAddr: string
     console.log("Salt Keccak256:", ethers.utils.id(salt.toString()));
 
     // 2. use CREATE2 deploy
-    await create2Deploy(
-        factory,
-        contractName,
-        constructorTypes,
-        constructorValues,
-        salt,
-    );
+    await create2Deploy(factory,contractName,constructorTypes,constructorValues,salt);
     return hookAddress;
 }

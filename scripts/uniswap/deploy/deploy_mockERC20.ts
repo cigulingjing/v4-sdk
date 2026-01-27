@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-import { CONTRACTS, CONTRACT_ADDRESSES, RPC_URL, PRIVATE_KEY } from "../config";
+import { CONTRACT_ADDRESSES, RPC_URL, PRIVATE_KEY } from "../../../config/uniswap.config";
 import { create2Deploy } from "./help";
 
 
@@ -26,9 +26,6 @@ async function deployDemo() {
     // 2. Deploy with create2
     deployMockERC20(name,symbol,initialSupply);
 }
-// Single file test
-// deployDemo();
-
 // Deploy MockERC20 contract using Create2
 export async function deployMockERC20(name:string,symbol:string,initialSupply:bigint) : Promise<string> {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
@@ -40,3 +37,6 @@ export async function deployMockERC20(name:string,symbol:string,initialSupply:bi
 }
 
 
+if (require.main === module) {
+    deployDemo();
+}

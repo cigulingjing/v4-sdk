@@ -8,7 +8,12 @@ async function main() {
 
     // Normal deploy
     const MutiVoucherFactory = await ethers.getContractFactory("MutiVoucher", wallet);
-    const Voucher = await MutiVoucherFactory.deploy(0);
+    const Voucher = await MutiVoucherFactory.deploy();
     await Voucher.deployed();
     console.log(`MutiVoucher contract is deployed at: ${Voucher.address} by account(${walletAddress})`);
 };
+
+main().catch(error => {
+    console.error(error);
+    process.exit(1);
+});

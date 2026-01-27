@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { Wallet, Contract } from "ethers";
 
-import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, INITIAL_LIQUIDITY } from "../config";
+import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, INITIAL_LIQUIDITY } from "../../../config/uniswap.config";
 import { ModifyPositionParams, PoolKey } from "../lib/types";
 import { getPoolPrice, getPoolSqrtPrice, modifyPosition } from "../lib/pool";
 import { getERC20Balance, isApproved, approveERC20 } from "../lib/ERC20";

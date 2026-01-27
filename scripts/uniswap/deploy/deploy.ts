@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import type { Contract } from "ethers";
-import { CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES, INITIAL_SUPPLY } from "../config";
+import { CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES, INITIAL_SUPPLY } from "../../../config/uniswap.config";
 import { isDeployed, bigintToBytes32, abiEncode } from "../lib/utils";
 import { mintERC20 } from "../lib/ERC20";
 import { create2Deploy, deployHookWithFlags } from "./help";
@@ -34,12 +34,10 @@ async function main() {
     }
 
     // 2. Deploy poolManager.sol
-    const liquidityProvider = walletAddress;
-    const poolManagerAddr = await create2Deploy(factory, "PoolManager", ["address"], [liquidityProvider], salt);
-
-    // 3.1 Deploy DynamicFee Hook and limit order hook.
-    let dynamicAddress = await deployDynamic(create2Address, poolManagerAddr);
-    let limitOrderAddress = await deployLimitOrder(create2Address, poolManagerAddr);
+    const poolManagerAddr = await create2Deploy(factory, "PoolManager", ["address"], [walletAddress], salt);
+    // 3. Deploy DynamicFee Hook and limit order hook.
+    let dynamicAddress = await deployDynamic(wallet,create2Address, poolManagerAddr);
+    let limitOrderAddress = await deployLimitOrder(wallet,create2Address, poolManagerAddr);
 
     // 4. Deploy liquidity
     let key = POOL_KEYS.limitOrderPoolKey; // old poolkey, need to update.
@@ -48,7 +46,6 @@ async function main() {
     key.hooks = limitOrderAddress;
 
     const liquidityPoolAddr = await create2Deploy(factory, "LiquidPool", ["address", "(address,address,uint24,int24,address)"], [poolManagerAddr, Object.values(key)], salt);
-
 
     // 5. Output deployed addresses
     console.log("---- Deployed Addresses ----");
@@ -59,7 +56,7 @@ async function main() {
     console.log("liquidityPool = ", liquidityPoolAddr);
     console.log("limitOrder Hook = ", limitOrderAddress);
     console.log("dynamicFee Hook = ", dynamicAddress);
-    console.log("Please update the CONTRACT_ADDRESSES in config.ts!");
+    console.log("\nPlease update the CONTRACT_ADDRESSES in .env!\n");
 }
 
 main().catch(error => {

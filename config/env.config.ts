@@ -23,6 +23,7 @@ export interface EnvConfig {
         auction: {
             chainYVaultV2: string;
             chainXAuctionV2: string;
+            coinbase: string;
         };
         uniswap: {
             create2: string;
@@ -147,6 +148,7 @@ function loadConfig(): EnvConfig {
             auction: {
                 chainYVaultV2: getEnvValue("ChainYVaultV2", ""),
                 chainXAuctionV2: getEnvValue("ChainXAuctionV2", ""),
+                coinbase: getEnvValue("Coinbase", ""),
             },
             uniswap: {
                 create2: getEnvValue("Create2", "0x5FbDB2315678afecb367f032d93F642f64180aa3"),
@@ -172,17 +174,17 @@ function loadConfig(): EnvConfig {
         },
         abiPaths: {
             auction: {
-                chainYVault: joinAbiPath(abiRootDir, getEnvValue("CHAIN_Y_VAULT_ABI_PATH", "ChainYVaultV2.json")),
-                chainXAuction: joinAbiPath(abiRootDir, getEnvValue("CHAINX_AUCTION_ABI_PATH", "ChainXAuctionV2.json")),
+                chainYVault: getEnvValue("CHAIN_Y_VAULT_ABI_PATH", "ChainYVaultV2.json"),
+                chainXAuction: getEnvValue("CHAINX_AUCTION_ABI_PATH", "ChainXAuctionV2.json"),
             },
             uniswap: {
-                poolManager: joinAbiPath(abiRootDir, getEnvValue("PoolManager_abi_path", "PoolManager.json")),
-                mockERC20: joinAbiPath(abiRootDir, getEnvValue("MockERC20_abi_path", "MockERC20.json")),
-                liquidPool: joinAbiPath(abiRootDir, getEnvValue("LiquidPool_abi_path", "LiquidPool.json")),
-                limitOrder: joinAbiPath(abiRootDir, getEnvValue("LimitOrder_abi_path", "LimitOrder.json")),
-                dynamicFee: joinAbiPath(abiRootDir, getEnvValue("DynamicFee_abi_path", "DynamicFee.json")),
-                create2: joinAbiPath(abiRootDir, getEnvValue("Create2_abi_path", "Create2.json")),
-                example: joinAbiPath(abiRootDir, getEnvValue("Example_abi_path", "Example.json")),
+                poolManager: getEnvValue("PoolManager_abi_path", "PoolManager.json"),
+                mockERC20: getEnvValue("MockERC20_abi_path", "MockERC20.json"),
+                liquidPool: getEnvValue("LiquidPool_abi_path", "LiquidPool.json"),
+                limitOrder: getEnvValue("LimitOrder_abi_path", "LimitOrder.json"),
+                dynamicFee: getEnvValue("DynamicFee_abi_path", "DynamicFee.json"),
+                create2: getEnvValue("Create2_abi_path", "Create2.json"),
+                example: getEnvValue("Example_abi_path", "Example.json"),
             },
         },
     };
@@ -192,30 +194,6 @@ function loadConfig(): EnvConfig {
  * 导出配置对象
  */
 export const config: EnvConfig = loadConfig();
-
-/**
- * 便捷的导出,用于快速访问常用配置
- */
 export const RPC_URL = config.rpc.url;
 export const PRIVATE_KEY = config.wallet.privateKey;
 export const ACCOUNT_ADDR = config.wallet.address;
-
-// Uniswap 合约地址
-export const CONTRACT_ADDRESSES = {
-    Create2: config.contracts.uniswap.create2,
-    Token0: config.contracts.uniswap.token0,
-    Token1: config.contracts.uniswap.token1,
-    PoolManager: config.contracts.uniswap.poolManager,
-    LiquidPool: config.contracts.uniswap.liquidPool,
-    LimitOrder: config.contracts.uniswap.limitOrder,
-    DynamicFee: config.contracts.uniswap.dynamicFee,
-};
-
-// Pool 配置
-export const SALT = config.pool.salt;
-export const SALT_LIMITORDER = config.pool.saltLimitOrder;
-export const PRICE_INIT = config.pool.priceInit;
-export const PRICE_LIMIT = config.pool.priceLimit;
-export const INITIAL_LIQUIDITY = config.pool.initialLiquidity;
-export const INITIAL_SUPPLY = config.pool.initialSupply;
-export const DYNAMIC_FEE_FLAG = config.pool.dynamicFeeFlag;

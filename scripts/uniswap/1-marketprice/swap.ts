@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import type { Wallet } from "ethers";
-import { CONTRACT_ADDRESSES, CONTRACTS, RPC_URL, PRIVATE_KEY, SALT, SALT_LIMITORDER } from "../config";
+import { CONTRACT_ADDRESSES, CONTRACTS, RPC_URL, PRIVATE_KEY, SALT, SALT_LIMITORDER } from "../../../config/uniswap.config";
 import { SwapParams } from "../lib/types";
 import { getPoolPrice, getCurrentTick } from "../lib/pool";
 import { getERC20Balance, isApproved, approveERC20 } from "../lib/ERC20";

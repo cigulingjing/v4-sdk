@@ -81,13 +81,13 @@ export function buildXTx(
 // 使用私钥签名 legacy 交易，返回 rawTransaction（RLP 编码）
 export async function buildAuctionCreatedTx(
     wallet: Wallet,
-    chainId: number,
     nonce: number = 0,
     gasPrice: bigint = BigInt(0),
     gasLimit: bigint = BigInt(0),
     to: string = "0x",
     value: bigint = BigInt(0),
     data: string = "0x",
+    chainId: number,
 ) {
     const tx = {
         nonce,

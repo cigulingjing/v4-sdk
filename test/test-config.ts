@@ -1,4 +1,4 @@
-import { config } from "./config/env.config";
+import { config } from "../config/env.config";
 
 console.log("=== 配置验证 ===\n");
 

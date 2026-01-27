@@ -1,6 +1,6 @@
 import {ethers} from "hardhat";
 import {Wallet , Contract} from "ethers";
-import { CONTRACT_ADDRESSES } from "../config";
+import { CONTRACT_ADDRESSES } from "../../../config/uniswap.config";
 
 export async function getContract(wallet:Wallet, name:string): Promise<Contract> {
     switch(name){

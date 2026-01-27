@@ -1,6 +1,6 @@
 import { Contract, Wallet } from "ethers";
 import { ethers } from "hardhat";
-import { CONTRACT_ADDRESSES, CONTRACTS, PRIVATE_KEY, RPC_URL } from "../config";
+import { CONTRACT_ADDRESSES, CONTRACTS, PRIVATE_KEY, RPC_URL } from "../../../config/uniswap.config";
 import { getERC20Balance } from "../lib/ERC20";
 import { getContract } from "../lib/wallet";
 

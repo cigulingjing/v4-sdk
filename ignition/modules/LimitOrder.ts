@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
-import { CONTRACT_ADDRESSES, CONTRACTS } from "../../scripts/uniswap/config";
+import { CONTRACT_ADDRESSES, CONTRACTS } from "../../config/uniswap.config";
 
 function encoder(types: string[], values: any[]): string {
     const abiCoder = ethers.AbiCoder.defaultAbiCoder();

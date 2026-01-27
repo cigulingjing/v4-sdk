@@ -24,6 +24,7 @@ contract Create2 {
              */
             newContract := create2(callvalue(), add(initCode, 0x20), mload(initCode), salt)
         }
+        console.log("Create2 deployed to:", newContract);
         emit Deploy(newContract);
     }
 
