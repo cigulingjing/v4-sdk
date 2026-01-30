@@ -20,6 +20,7 @@ export interface EnvConfig {
 
     // 合约地址配置
     contracts: {
+        mutiVoucher:string;
         auction: {
             chainYVaultV2: string;
             chainXAuctionV2: string;
@@ -35,28 +36,13 @@ export interface EnvConfig {
             dynamicFee: string;
         };
     };
-
-    // Pool 配置
-    pool: {
-        salt: string;
-        saltLimitOrder: string;
-        priceInit: number;
-        priceLimit: number;
-        initialLiquidity: bigint;
-        initialSupply: bigint;
-        dynamicFeeFlag: number;
-    };
-
-    // 路径配置
-    paths: {
-        abiRootDir: string;  // ABI 文件根目录
-    };
-
     // ABI 文件路径配置 (完整路径)
     abiPaths: {
+        mutiVoucher:string;
         auction: {
             chainYVault: string;
             chainXAuction: string;
+            coinbase:string;
         };
         uniswap: {
             poolManager: string;
@@ -67,6 +53,20 @@ export interface EnvConfig {
             create2: string;
             example: string;
         };
+    };
+    // Pool 配置
+    pool: {
+        salt: string;
+        saltLimitOrder: string;
+        priceInit: number;
+        priceLimit: number;
+        initialLiquidity: bigint;
+        initialSupply: bigint;
+        dynamicFeeFlag: number;
+    };
+    // 路径配置
+    paths: {
+        abiRootDir: string;  // ABI 文件根目录
     };
 }
 
@@ -145,6 +145,7 @@ function loadConfig(): EnvConfig {
             ),
         },
         contracts: {
+            mutiVoucher:getEnvValue("MutiVoucher",""),
             auction: {
                 chainYVaultV2: getEnvValue("ChainYVaultV2", ""),
                 chainXAuctionV2: getEnvValue("ChainXAuctionV2", ""),
@@ -160,6 +161,23 @@ function loadConfig(): EnvConfig {
                 dynamicFee: getEnvValue("DynamicFee", "0x541eEcD8E9A59476E436A766123B27330e149040"),
             },
         },
+        abiPaths: {
+            mutiVoucher: getEnvValue("MutiVoucher_abi_path", "MutiVoucher.json"),
+            auction: {
+                chainYVault: getEnvValue("ChainYVault_abi_path", "ChainYVaultV2.json"),
+                chainXAuction: getEnvValue("ChainXAuction_abi_path", "ChainXAuctionV2.json"),
+                coinbase: getEnvValue("Coinbase_abi_path", "Coinbase.json"),
+            },
+            uniswap: {
+                poolManager: getEnvValue("PoolManager_abi_path", "PoolManager.json"),
+                mockERC20: getEnvValue("MockERC20_abi_path", "MockERC20.json"),
+                liquidPool: getEnvValue("LiquidPool_abi_path", "LiquidPool.json"),
+                limitOrder: getEnvValue("LimitOrder_abi_path", "LimitOrder.json"),
+                dynamicFee: getEnvValue("DynamicFee_abi_path", "DynamicFee.json"),
+                create2: getEnvValue("Create2_abi_path", "Create2.json"),
+                example: getEnvValue("Example_abi_path", "Example.json"),
+            },
+        },
         pool: {
             salt: getEnvValue("SALT", ethers.utils.keccak256("0x00")),
             saltLimitOrder: getEnvValue("SALT_LIMITORDER", ethers.utils.keccak256("0x01")),
@@ -172,21 +190,7 @@ function loadConfig(): EnvConfig {
         paths: {
             abiRootDir,
         },
-        abiPaths: {
-            auction: {
-                chainYVault: getEnvValue("CHAIN_Y_VAULT_ABI_PATH", "ChainYVaultV2.json"),
-                chainXAuction: getEnvValue("CHAINX_AUCTION_ABI_PATH", "ChainXAuctionV2.json"),
-            },
-            uniswap: {
-                poolManager: getEnvValue("PoolManager_abi_path", "PoolManager.json"),
-                mockERC20: getEnvValue("MockERC20_abi_path", "MockERC20.json"),
-                liquidPool: getEnvValue("LiquidPool_abi_path", "LiquidPool.json"),
-                limitOrder: getEnvValue("LimitOrder_abi_path", "LimitOrder.json"),
-                dynamicFee: getEnvValue("DynamicFee_abi_path", "DynamicFee.json"),
-                create2: getEnvValue("Create2_abi_path", "Create2.json"),
-                example: getEnvValue("Example_abi_path", "Example.json"),
-            },
-        },
+        
     };
 }
 
@@ -197,3 +201,4 @@ export const config: EnvConfig = loadConfig();
 export const RPC_URL = config.rpc.url;
 export const PRIVATE_KEY = config.wallet.privateKey;
 export const ACCOUNT_ADDR = config.wallet.address;
+

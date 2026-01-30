@@ -75,7 +75,6 @@ contract ChainYVaultV2 is ReentrancyGuard, Ownable,CoinbaseOperator {
         uint256 amount
     );
 
-    event UnlockStrategyUpdated(uint32 indexed auctionType, address strategy);
 
     constructor(address coinBaseAddress) ReentrancyGuard() Ownable(msg.sender) {
         coinbase = CoinbaseOperator(coinBaseAddress);
@@ -84,13 +83,6 @@ contract ChainYVaultV2 is ReentrancyGuard, Ownable,CoinbaseOperator {
     function isSingleAuction(uint32 auctionType) internal pure returns (bool) {
         return (auctionType & 0x0000FF00) == 0;
     }
-
-    function setUnlockStrategy(uint32 auctionType, address strategy) external onlyOwner {
-        require(strategy != address(0), "Invalid strategy address");
-        unlockStrategies[auctionType] = strategy;
-        emit UnlockStrategyUpdated(auctionType, strategy);
-    }
-
 
     // 创建Config，创建config，createAuction创建必须指定ID
     function createAuctionConfig(
@@ -140,12 +132,12 @@ contract ChainYVaultV2 is ReentrancyGuard, Ownable,CoinbaseOperator {
             address(this),
             activeAuctionsCount
         )));
+        uint256 currentCount=activeAuctionsCount;
         activeAuctionsCount++;
 
 
         uint32 auctionType = config.auctionType;
-        uint256 revealTime = isSingleAuction(auctionType) && !config.isSystemExpiration ? 
-                            expiration : getTodayEndTimestamp();
+        uint256 revealTime = isSingleAuction(auctionType) && !config.isSystemExpiration ?  expiration : getTodayEndTimestamp();
 
         onlyOneAuction = isSingleAuction(config.auctionType) ? onlyOneAuction : auctionId;
 
@@ -156,7 +148,8 @@ contract ChainYVaultV2 is ReentrancyGuard, Ownable,CoinbaseOperator {
         });
 
         lockId = lockTokens(hashSecret, auctionId);
-        emit AuctionCreated(auctionId, auctionType, activeAuctionsCount-1, revealTime);
+        emit AuctionCreated(auctionId, auctionType, currentCount, revealTime);
+        
     }
 
     function lockTokens(
@@ -200,13 +193,9 @@ contract ChainYVaultV2 is ReentrancyGuard, Ownable,CoinbaseOperator {
         AuctionLock storage lock = lockedTokens[lockId];
         require(lock.isLocked, "Tokens not locked");
         
-        address strategy = unlockStrategies[lock.auctionType];
-        require(strategy != address(0), "No unlock strategy");
-
         TransactionParser.RecptLog memory log = TransactionParser.parseRecptLog(receipt);
-
         // 从log中解析出：中标成功者，和解锁金额
-        (address recipient, uint256 unlockAmount) = IUnlockStrategy(strategy).processUnlock(
+        (address recipient, uint256 unlockAmount) = processUnlock(
             log.eventTopic,
             log.eventData,
             lock.amount
@@ -254,6 +243,33 @@ contract ChainYVaultV2 is ReentrancyGuard, Ownable,CoinbaseOperator {
         emit TokensUnlocked(lockId, recipient, unlockAmount);
     }
 
+    function processUnlock(
+        bytes32 eventTopic,
+        bytes memory eventData,
+        uint256 lockedAmount
+    ) internal returns (address recipient, uint256 unlockAmount) {
+        // 验证事件主题是否为 MatchResultWithdrawn
+        require(
+            eventTopic == keccak256("MatchResultWithdrawn(uint256,bytes32,address,uint256)"),
+            "Invalid event topic"
+        );
+
+        // 解析事件数据
+        (
+            uint256 auctionId,
+            bytes32 lockId,
+            address bidder,
+            uint256 transferAmount
+        ) = abi.decode(eventData, (uint256, bytes32, address, uint256));
+
+        // 返回解锁信息
+        return (
+            bidder,              // 接收者为中标者
+            transferAmount       // 解锁金额为转账金额
+        );
+    }
+
+
     function getAuctionInfo(uint256 auctionId) 
         external 
         view 
@@ -292,6 +308,10 @@ contract ChainYVaultV2 is ReentrancyGuard, Ownable,CoinbaseOperator {
 
     function getActiveAuctionsCount() external view returns (uint256){
         return activeAuctionsCount;
+    }
+
+    function getActiveConfigsCount() external view returns (uint256){
+        return activeConfigsCount;
     }
 
     receive() external payable {}

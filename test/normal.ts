@@ -11,20 +11,31 @@ async function getCode(address:string){
     }
 }
 
+async function ConvertBytes32(){
+    const voucherName="BitCoin"
+    const voucherNameByte32=ethers.utils.formatBytes32String(voucherName);
+    console.log("voucherNameByte32:",voucherNameByte32);
+
+    let parseNameString=ethers.utils.parseBytes32String(voucherNameByte32);
+    console.log("parseNameString:",parseNameString);
+}
+
+
 function main(){
     const name = "InvalidTickLower()";
     const selector = utils.id(name).substring(0, 10) 
     console.log("%s abi encode:%s",name,selector);
- 
+    
+    ConvertBytes32()
     // const encoded = utils.defaultAbiCoder.encode(["string"], [name]);
     // console.log(encoded); 
-    getCode(CONTRACT_ADDRESSES.Create2);
-    getCode(CONTRACT_ADDRESSES.Token0);
-    getCode(CONTRACT_ADDRESSES.Token1);
-    getCode(CONTRACT_ADDRESSES.PoolManager);
-    getCode(CONTRACT_ADDRESSES.LiquidPool);
-    getCode(CONTRACT_ADDRESSES.LimitOrder);
-    getCode(CONTRACT_ADDRESSES.DynamicFee);
+    // getCode(CONTRACT_ADDRESSES.Create2);
+    // getCode(CONTRACT_ADDRESSES.Token0);
+    // getCode(CONTRACT_ADDRESSES.Token1);
+    // getCode(CONTRACT_ADDRESSES.PoolManager);
+    // getCode(CONTRACT_ADDRESSES.LiquidPool);
+    // getCode(CONTRACT_ADDRESSES.LimitOrder);
+    // getCode(CONTRACT_ADDRESSES.DynamicFee);
 }
 
 if (require.main === module){

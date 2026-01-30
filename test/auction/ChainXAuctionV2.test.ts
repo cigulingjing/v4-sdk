@@ -1,10 +1,10 @@
 
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
-import { getAuctionID, buildAuctionCreatedReceipt, buildAuctionCreatedTx } from "../../lib/serialize";
+import { getAuctionID, buildAuctionCreatedReceipt, buildAuctionCreatedTx } from "../../src/auction/serialize";
 
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
-import type { Contract, Wallet } from "ethers";
+import { Contract, Wallet } from "ethers";
 
 describe("ChainXAuctionV2", function () {
     let chainXAuction: Contract;
@@ -44,12 +44,13 @@ describe("ChainXAuctionV2", function () {
             const auctionId: string = getAuctionID(seller, sourceChainId, vaultAddress, activeAuctionsCount);
 
             // 构造链Y的createAuciton交易sellerWallet
-            const rawTx = await buildAuctionCreatedTx(sellerWallet,nonce,gasPrice,gasLimit,vaultAddress,BigInt(0),"0x",sourceChainId);
+            const rawTx = await buildAuctionCreatedTx({nonce,gasPrice,gasLimit,to: vaultAddress,value: BigInt(0),data: "0x",chainId: sourceChainId});
+            const signedTx = await sellerWallet.signTransaction(rawTx);
 
-            const parsedTx = ethers.utils.parseTransaction(rawTx);
+            const parsedTx = ethers.utils.parseTransaction(signedTx);
             console.log("parsed from:", parsedTx.from, "v:", parsedTx.v, "chainId:", parsedTx.chainId,"txHash:",parsedTx.hash);
 
-            const debug = await chainXAuction.debugRecover(rawTx);
+            const debug = await chainXAuction.debugRecover(signedTx);
             console.log(
                 "debug signer", debug[0],
                 "txHash", debug[1],
@@ -68,13 +69,12 @@ describe("ChainXAuctionV2", function () {
                 auctionId,
                 auctionType: Number(auctionType),
                 activeAuctionCount: BigInt(activeAuctionsCount),
-                revealTime: BigInt(revealStartTime),
-                logAddress
+                revealTime: BigInt(revealStartTime)
             });
 
             const crossChainMessage = ethers.utils.defaultAbiCoder.encode(
                 ["tuple(uint256 sourceChainId, bytes rawTransaction, bytes rawRecpt)"],
-                [[sourceChainId, rawTx, rawRecpt]]
+                [[sourceChainId, signedTx, rawRecpt]]
             );
 
             await expect(chainXAuction.createAuction(crossChainMessage))
@@ -93,12 +93,14 @@ describe("ChainXAuctionV2", function () {
             let activeAuctionCount = BigInt(0);
             auctionId = getAuctionID(seller, sourceChainId, vaultAddress, activeAuctionCount);
 
-            const rawTx = await buildAuctionCreatedTx(sellerWallet,nonce,gasPrice,gasLimit,vaultAddress,BigInt(0),"0x",sourceChainId);
+            const rawTx = await buildAuctionCreatedTx({nonce,gasPrice,gasLimit,to: vaultAddress,value: BigInt(0),data: "0x",chainId: sourceChainId});
+            const signedTx= await sellerWallet.signTransaction(rawTx);
+
             const logAddress = "0x307833383843383138434138423932353162333933313331433038613733364136376363423139323937";
-            const rawRecpt = buildAuctionCreatedReceipt({ auctionId, auctionType, activeAuctionCount, revealTime, logAddress });
+            const rawRecpt = buildAuctionCreatedReceipt({ auctionId, auctionType, activeAuctionCount, revealTime });
             const crossChainMessage = ethers.utils.defaultAbiCoder.encode(
                 ["tuple(uint256 sourceChainId, bytes rawTransaction, bytes rawRecpt)"],
-                [[sourceChainId, rawTx, rawRecpt]]
+                [[sourceChainId, signedTx, rawRecpt]]
             );
             await chainXAuction.createAuction(crossChainMessage);
         });
@@ -153,19 +155,19 @@ describe("ChainXAuctionV2", function () {
 
             auctionId = getAuctionID(seller, sourceChainId, vaultAddress, activeAuctionCount);
 
-            const rawTx = await buildAuctionCreatedTx(sellerWallet,nonce,gasPrice,gasLimit,vaultAddress,BigInt(0),"0x",sourceChainId);
-            const logAddress = "0x307833383843383138434138423932353162333933313331433038613733364136376363423139323937";
+            const rawTx = await buildAuctionCreatedTx({nonce,gasPrice,gasLimit,to: vaultAddress,value: BigInt(0),data: "0x",chainId: sourceChainId});
+            const signedTx = await sellerWallet.signTransaction(rawTx);
+            const logAddress = "0x + chainYaddress"
             const rawRecpt = buildAuctionCreatedReceipt({
                 auctionId,
                 auctionType,
                 activeAuctionCount,
                 revealTime,
-                logAddress,
             });
 
             const crossChainMessage = ethers.utils.defaultAbiCoder.encode(
                 ["tuple(uint256 sourceChainId, bytes rawTransaction, bytes rawRecpt)"],
-                [[sourceChainId, rawTx, rawRecpt]]
+                [[sourceChainId, signedTx, rawRecpt]]
             );
 
             await chainXAuction.createAuction(crossChainMessage);
@@ -212,7 +214,8 @@ describe("ChainXAuctionV2", function () {
             ).to.emit(chainXAuction, "MatchResultSubmitted")
                 .withArgs(auctionId, lockId, await bidder1.address, finalValues[0]);
         });
-
+        
+        // 该方法在合约层并没有完善流程，也没有业务代码，挑战主要适用于复杂拍卖逻辑
         it("应该允许挑战匹配结果", async function () {
             const lockIds = [lockId];
             const bidders = [await bidder1.address];

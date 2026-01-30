@@ -1,8 +1,8 @@
 import{ethers} from "hardhat";
 import { RPC_URL, PRIVATE_KEY,CONTRACT_ADDRESSES } from "../../../config/uniswap.config";
-import { isDeployed } from "../lib/utils";
+import { isDeployed } from "../../../src/uniswap/lib/utils";
 import { create2Deploy } from "./help";
-import { getContract } from "../lib/wallet";
+import { getContract } from "../../../src/uniswap/lib/wallet";
 
 async function main(){
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);

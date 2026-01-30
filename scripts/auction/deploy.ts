@@ -8,6 +8,7 @@ async function main(){
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
+
     const coinbaseAddr = await deployCoinbase(wallet);
     const yVaultAddr = await deployYVault(wallet, coinbaseAddr);
     const xAuctionAddr = await deployXAuction(wallet, yVaultAddr);

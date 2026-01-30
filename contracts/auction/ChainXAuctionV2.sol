@@ -21,7 +21,6 @@ contract ChainXAuctionV2 is ReentrancyGuard, Ownable {
     // ============ 结构体定义 ============
     struct Vault {
         bool exists;
-        address seller; // 卖家
         uint256 revealTime; // 实际的揭示时间，并代表isRevealed(e.g. lockInfo.revealTime == 0)
         bytes32 vaultSecretHash;
         uint256 value;
@@ -172,40 +171,10 @@ contract ChainXAuctionV2 is ReentrancyGuard, Ownable {
 
         // ! 版本1：解析拍卖参数
         //  (uint256 auctionId, uint32 auctionType, uint256 nonce, uint256 revealStartTime) = EventParser.parseAuctionCreatedEvent(log.eventData);
-
         // 校验auctionId与message sender的绑定关系
         // 恶意sender无法伪造其他sender的auctionId
         // 恶意sender无法在其他链重放自己的auction
-        uint8 vAdj = uint8(rawTx.v);
-        if (vAdj >= 35) {
-            vAdj = 27 + uint8((vAdj - 35) % 2); // normalize EIP-155 v to 27/28
-        }
-
-        uint256 chainIdSig = 0;
-        if (rawTx.v >= 35) {
-            chainIdSig = (uint256(rawTx.v) - 35) / 2;
-        }
-
-        bytes[] memory payload = new bytes[](9);
-        payload[0] = _encodeUint(rawTx.nonce);
-        payload[1] = _encodeUint(rawTx.gasPrice);
-        payload[2] = _encodeUint(rawTx.gasLimit);
-        payload[3] = _encodeAddress(rawTx.to);
-        payload[4] = _encodeUint(rawTx.value);
-        payload[5] = _encodeBytes(rawTx.data);
-        payload[6] = _encodeUint(chainIdSig);
-        payload[7] = _encodeUint(0);
-        payload[8] = _encodeUint(0);
-
-        bytes32 txHash = keccak256(_encodeList(payload));
-        address sender = ecrecover(txHash, vAdj, rawTx.r, rawTx.s);
-
-        console.logBytes32(txHash);
-        console.log("vAdj:", vAdj);
-        console.log("chainID:",chainIdSig);
-        console.log("sender address:", sender);
-    
-
+        address sender = signerRecover(rawTx);
 
         uint256 auctionCheckId = uint256(
             keccak256(
@@ -240,6 +209,36 @@ contract ChainXAuctionV2 is ReentrancyGuard, Ownable {
             auctionType,
             auctions[auctionId].revealTime
         );
+    }
+
+    function signerRecover(TransactionParser.RawTransaction memory rawTx) internal pure returns (address sender)
+    {
+        uint8 vAdj = uint8(rawTx.v);
+        if (vAdj >= 35) {
+            vAdj = 27 + uint8((vAdj - 35) % 2); // normalize EIP-155 v to 27/28
+        }
+        uint256 chainIdSig = 0;
+        if (rawTx.v >= 35) {
+            chainIdSig = (uint256(rawTx.v) - 35) / 2;
+        }
+
+        bytes[] memory payload = new bytes[](9);
+        payload[0] = _encodeUint(rawTx.nonce);
+        payload[1] = _encodeUint(rawTx.gasPrice);
+        payload[2] = _encodeUint(rawTx.gasLimit);
+        payload[3] = _encodeAddress(rawTx.to);
+        payload[4] = _encodeUint(rawTx.value);
+        payload[5] = _encodeBytes(rawTx.data);
+        payload[6] = _encodeUint(chainIdSig);
+        payload[7] = _encodeUint(0);
+        payload[8] = _encodeUint(0);
+
+        bytes32 txHash = keccak256(_encodeList(payload));
+        sender = ecrecover(txHash, vAdj, rawTx.r, rawTx.s);
+        console.logBytes32(txHash);
+        console.log("vAdj:", vAdj);
+        console.log("chainID:",chainIdSig);
+        console.log("sender address:", sender);
     }
 
     // 调试接口：根据 rawTx 计算恢复的签名者
@@ -313,7 +312,6 @@ contract ChainXAuctionV2 is ReentrancyGuard, Ownable {
         if (!auction.vaults[targetLockId].exists) {
             Vault storage newLock = auction.vaults[targetLockId];
             newLock.exists = true;
-            newLock.seller = seller;
             newLock.vaultSecretHash = vaultSecretHash;
             auction.vaultCount++;
             emit LockCreated(auctionId, targetLockId, auction.revealTime);
@@ -355,11 +353,6 @@ contract ChainXAuctionV2 is ReentrancyGuard, Ownable {
 
         Vault storage lockInfo = auction.vaults[lockId];
         require(lockInfo.exists, "Lock does not exist");
-        // 必须限定卖方才可以揭示。
-        require(
-            lockInfo.seller == msg.sender,
-            "Lock is not for the current user"
-        );
         require(lockInfo.revealTime == 0, "Lock already revealed");
         require(
             keccak256(abi.encodePacked(value, salt)) ==

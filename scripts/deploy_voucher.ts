@@ -1,6 +1,7 @@
 import { ethers } from "hardhat";
 import { RPC_URL, PRIVATE_KEY } from "../config/env.config";
 
+// 事实上在punk链上不需要部署Voucher，其是创世块部署的.
 async function main() {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);

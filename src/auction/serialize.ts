@@ -1,15 +1,8 @@
 import { ethers } from "hardhat";
 import { Wallet } from "ethers";
-
-
-// event AuctionCreated(uint256 indexed auctionId, uint32 auctionType, uint256 activeAuctionCount, uint256 revealTime
-interface auctionCreatedEvent {
-    auctionId: string; // 使用string存储，auctionId是Keccak256计算的hash值，在调用合约时候会自动转化为uiny256
-    auctionType: number;
-    activeAuctionCount: bigint;
-    revealTime: bigint;
-    logAddress: string;
-}
+import { MatchResultWithdrawnEvent,auctionCreatedEvent} from "./event";
+import { utils } from "ethers";
+import { AUCTION_ADDR } from "../../config/auction.config";
 
 
 export function buildAuctionCreatedReceipt(
@@ -31,7 +24,7 @@ export function buildAuctionCreatedReceipt(
         [event.auctionType, event.activeAuctionCount, event.revealTime]
     );
     const log = [
-        event.logAddress,
+        AUCTION_ADDR.chainYVault,
         [topic0, topic1],
         ethers.utils.arrayify(eventData),
     ];
@@ -78,17 +71,26 @@ export function buildXTx(
 }
 
 
-// 使用私钥签名 legacy 交易，返回 rawTransaction（RLP 编码）
-export async function buildAuctionCreatedTx(
-    wallet: Wallet,
-    nonce: number = 0,
-    gasPrice: bigint = BigInt(0),
-    gasLimit: bigint = BigInt(0),
-    to: string = "0x",
-    value: bigint = BigInt(0),
-    data: string = "0x",
-    chainId: number,
-) {
+interface BuildAuctionCreatedTxParams {
+    nonce?: number;
+    gasPrice?: bigint;
+    gasLimit?: bigint;
+    to?: string;
+    value?: bigint;
+    data?: string;
+    chainId?: number;
+}
+
+export async function buildAuctionCreatedTx({
+    nonce = 0,
+    gasPrice = BigInt(0),
+    gasLimit = BigInt(0),
+    to = "0x",
+    value = BigInt(0),
+    data = "0x",
+    chainId=31337,
+}: BuildAuctionCreatedTxParams
+){
     const tx = {
         nonce,
         gasPrice,
@@ -99,8 +101,46 @@ export async function buildAuctionCreatedTx(
         chainId,
         type: 0, // Legacy tx
     };
-    const signed = await wallet.signTransaction(tx);
-    return signed;
+    return tx
+}
+
+
+/**
+ * 构造 Unlock Receipt（RLP）
+ */
+export function buildChainXUnlockReceipt({
+    auctionId,
+    lockId,
+    recipient,
+    amount,
+}: MatchResultWithdrawnEvent): string {
+    const status = "0x01";
+    const cumulativeGasUsed = "0x00";
+    const logsBloom = "0x" + "00".repeat(256);
+    const logAddress = AUCTION_ADDR.chainXAuction;
+
+    const topic0 = utils.id(
+        "MatchResultWithdrawn(uint256,bytes32,address,uint256)"
+    );
+
+    const eventData = utils.defaultAbiCoder.encode(
+        ["uint256", "bytes32", "address", "uint256"],
+        [auctionId, lockId, recipient, amount]
+    );
+
+    const log = [
+        logAddress,
+        [topic0],
+        utils.arrayify(eventData),
+    ];
+
+    const logBlob = utils.RLP.encode(log);
+    return utils.RLP.encode([
+        status,
+        cumulativeGasUsed,
+        logsBloom,
+        logBlob,
+    ]);
 }
 
 // 仅在直接运行本文件时演示生成 rawReceipt，避免被 require 时产生副作用
@@ -117,6 +157,6 @@ if (require.main === module) {
     const revealTime = BigInt(Math.floor(Date.now() / 1000) + 3600);
     const logAddress = "0x307833383843383138434138423932353162333933313331433038613733364136376363423139323937";
 
-    const rowReceipt = buildAuctionCreatedReceipt({ auctionId, auctionType, activeAuctionCount, revealTime, logAddress })
+    const rowReceipt = buildAuctionCreatedReceipt({ auctionId, auctionType, activeAuctionCount, revealTime })
     console.log("rawReceipt:", rowReceipt);
 }

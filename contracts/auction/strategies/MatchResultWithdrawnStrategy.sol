@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "../interfaces/IUnlockStrategy.sol";
 
+// 直接迁移到ChianYVault中实现，该合约弃用
 contract MatchResultWithdrawnStrategy is IUnlockStrategy {
     function processUnlock(
         bytes32 eventTopic,

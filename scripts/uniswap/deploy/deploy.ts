@@ -1,8 +1,8 @@
 import { ethers } from "hardhat";
 import type { Contract } from "ethers";
 import { CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES, INITIAL_SUPPLY } from "../../../config/uniswap.config";
-import { isDeployed, bigintToBytes32, abiEncode } from "../lib/utils";
-import { mintERC20 } from "../lib/ERC20";
+import { isDeployed, bigintToBytes32, abiEncode } from "../../../src/uniswap/lib/utils";
+import { mintERC20 } from "../../../src/uniswap/lib/ERC20";
 import { create2Deploy, deployHookWithFlags } from "./help";
 import { deployMockERC20 } from "./deploy_mockERC20";
 import { deployDynamic, deployLimitOrder } from "./deploy_hooks";
