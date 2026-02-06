@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import type { Contract } from "ethers";
-import { CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES, INITIAL_SUPPLY } from "../../../config/uniswap.config";
+import {  POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES, INITIAL_SUPPLY } from "../../../config/uniswap.config";
 import { isDeployed, bigintToBytes32, abiEncode } from "../../../src/uniswap/lib/utils";
 import { mintERC20 } from "../../../src/uniswap/lib/ERC20";
 import { create2Deploy, deployHookWithFlags } from "./help";

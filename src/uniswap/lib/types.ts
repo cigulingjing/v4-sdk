@@ -14,8 +14,8 @@ export interface SwapParams {
 }
 
 export interface ModifyPositionParams {
-    tickLower: number;
-    tickUpper: number;
+    tickLower: number; // 流动性生效最低价格
+    tickUpper: number; // 流动性生效最高价格
     liquidityDelta: bigint;
     salt?:string;
 }
