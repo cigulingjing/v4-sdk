@@ -1,8 +1,7 @@
-import { Contract, Wallet } from "ethers";
-import { ethers } from "hardhat";
-import { CONTRACT_ADDRESSES, CONTRACTS, PRIVATE_KEY, RPC_URL } from "../../../config/uniswap.config";
+import { Contract, providers, Wallet } from "ethers";
+import { CONTRACT_ADDRESSES, PRIVATE_KEY, RPC_URL } from "../../../config/uniswap.config";
 import { getERC20Balance } from "../lib/ERC20";
-import { getContract } from "../lib/wallet";
+import { getContract } from "../lib/contract";
 
 async function withdrawLimitOrder(contract: Contract, epoch: number, to: string): Promise<{ owner: string; epoch: string; liquidity: string; }> {
     try {
@@ -50,7 +49,7 @@ function handleContractError(error: any): void {
 
 
 async function main() {
-    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+    const provider = new providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
     const token0 = await getContract(wallet, "Token0");
