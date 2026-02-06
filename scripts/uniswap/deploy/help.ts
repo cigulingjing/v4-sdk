@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import type { Contract } from "ethers";
-import { CONTRACTS } from "../../../config/uniswap.config";
+import { CONTRACTS_ABI } from "../../../config/uniswap.config";
 import { bigintToBytes32, bytecodeWithArgs } from "../../../src/uniswap/lib/utils";
 
 // Constants that correspond to the ones in Solidity
@@ -11,7 +11,7 @@ const MAX_LOOP = 100_000;
 export async function create2Deploy(create2: Contract, contractName: string, types: string[], params: any[], salt: bigint): Promise<string> {
 
     // Load the contract artifact using TypeScript
-    const scArtifact = CONTRACTS[contractName];
+    const scArtifact = (CONTRACTS_ABI as any)[contractName];
     if (scArtifact == null) {
         throw new Error(`Contract artifact for ${contractName} not found`);
     }
@@ -30,7 +30,7 @@ export async function create2Deploy(create2: Contract, contractName: string, typ
 
     console.log("create2 address",create2.address);
 
-    const tx = await create2.deployCreate2WithSalt(initCode, saltHex, { gasLimit: 30_000_000 });
+    const tx = await create2.deployCreate2WithSalt(initCode, saltHex, { gasLimit: 8_000_000 });
     await tx.wait();
 
     console.log(`deterministic deployed ${contractName} by transaction(${tx.hash})`);
@@ -46,7 +46,7 @@ export async function findHookAddress(
     flags: bigint
 ): Promise<{ hookAddress: string, salt: bigint }> {
     // Load the contract artifact using TypeScript
-    const bytecode = CONTRACTS[contractName].bytecode;
+    const bytecode = (CONTRACTS_ABI as any)[contractName].bytecode;
     if (bytecode == undefined || bytecode.length == 0) {
         throw new Error(`Bytecode for contract ${contractName} is undefined or empty`);
     }

@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, PRICE_INIT, INITIAL_SUPPLY } from "../../../config/uniswap.config";
+import { CONTRACT_ADDRESSES, CONTRACTS_ABI, POOL_KEYS, RPC_URL, PRIVATE_KEY, PRICE_INIT, INITIAL_SUPPLY } from "../../../config/uniswap.config";
 import { priceToSqrtPrice } from "../../../src/uniswap/lib/liqCalculation";
 import { getERC20Balance, mintERC20 } from "../../../src/uniswap/lib/ERC20";
 import { getContract } from "../../../src/uniswap/lib/contract";
@@ -21,7 +21,7 @@ async function isPoolInitialized( poolManager: Contract,  poolKey: any,sqrtPrice
 export async function initPoolManager(contractAddress: string) {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-    const constract = new ethers.Contract(contractAddress, CONTRACTS["PoolManager"].abi, wallet);
+    const constract = new ethers.Contract(contractAddress, (CONTRACTS_ABI as any)["PoolManager"].abi, wallet);
     const price = PRICE_INIT
     const sqrtPriceX96 = priceToSqrtPrice(price);
     // console.log(`sqrtPriceX96: ${sqrtPriceX96}`);
