@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers } from "ethers";
 import { Wallet } from "ethers";
 import { MatchResultWithdrawnEvent,auctionCreatedEvent} from "./event";
 import { utils } from "ethers";

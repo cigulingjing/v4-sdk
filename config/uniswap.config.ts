@@ -10,7 +10,7 @@ import {join} from "path";
 
 // ============================== 导出配置供其他模块使用 ======================================
 export { RPC_URL, PRIVATE_KEY };
-export { CONTRACT_ADDRESSES,CONTRACTS,POOL_KEYS};
+export { CONTRACT_ADDRESSES,CONTRACTS_ABI,POOL_KEYS};
 export { SALT, SALT_LIMITORDER, PRICE_INIT, PRICE_LIMIT, INITIAL_LIQUIDITY, INITIAL_SUPPLY };
 
 
@@ -34,7 +34,7 @@ function relativePath(filepath:string):string{
 // Uniswap ABI 路径
 const ABI_PATHS = config.abiPaths.uniswap;
 
-const CONTRACTS: { [contractName: string]: any } = {
+const CONTRACTS_ABI={
   PoolManager: require(relativePath(ABI_PATHS.poolManager)),
   MockERC20: require(relativePath(ABI_PATHS.mockERC20)),
   LiquidPool: require(relativePath(ABI_PATHS.liquidPool)),
@@ -42,7 +42,7 @@ const CONTRACTS: { [contractName: string]: any } = {
   DynamicFee: require(relativePath(ABI_PATHS.dynamicFee)),
   Create2: require(relativePath(ABI_PATHS.create2)),
   Example: require(relativePath(ABI_PATHS.example)),
-};
+}
 
 // ============================== Pool Keys ================================================
 // Pool 配置

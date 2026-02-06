@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers } from "ethers";
 
 // Define an array of error signatures
 // Error NotSelf(): 0x29c3b7ee
@@ -70,7 +70,7 @@ const funcSignatures = [
 
 // Function to compute the function selector for an error signature
 const computeFunctionSelector = (signature: string): string => {
-  const hash = ethers.keccak256(ethers.toUtf8Bytes(signature));
+  const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(signature));
   return hash.slice(0, 10); // "0x" + 8 hex characters
 };
 

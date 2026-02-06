@@ -1,6 +1,6 @@
 // JsonRpcProvider is runtime object
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { ethers } from "hardhat"
+import { ethers } from "ethers"
 
 export async function isDeployed(provider: JsonRpcProvider, address: string) {
     let code = await provider.getCode(address);

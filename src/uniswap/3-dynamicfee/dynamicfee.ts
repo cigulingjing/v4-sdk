@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers } from "ethers";
 import type { Contract } from "ethers";
 import { PoolKey, SwapParams, ModifyPositionParams } from "../lib/types";
 

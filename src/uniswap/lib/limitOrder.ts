@@ -2,8 +2,8 @@ import { Contract, providers, Wallet } from "ethers";
 import { PoolKey } from "./types";
 import { getPoolId } from "./pool";
 import { RPC_URL, PRIVATE_KEY, POOL_KEYS } from "../../../config/uniswap.config";
-import {ethers} from "hardhat";
-import { getContract } from "./wallet";
+import {ethers} from "ethers";
+import { getContract } from "./contract";
 
 export async function getTickLowerLast(contract:Contract, poolKey: PoolKey): Promise<bigint> {
     const poolId = getPoolId(poolKey);

@@ -1,5 +1,5 @@
 {
-  "name": "v4-sdk",
+  "name": "punkkit-sdk",
   "version": "1.0.0",
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "1.0.2",
@@ -13,10 +13,24 @@
     "ethers": "5.7.2",
     "hardhat": "2.26.3",
     "solmate": "^6.8.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "tsup": "^8.5.1"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "solc": "^0.8.25"
-  }
+  },
+  "description": "In [Uniswap V4 core](https://github.com/Uniswap/v4-core) repo:",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "test": "mocha"
+  },
+  "author": "",
+  "license": "ISC"
 }

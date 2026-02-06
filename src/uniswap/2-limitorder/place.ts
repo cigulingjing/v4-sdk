@@ -1,11 +1,11 @@
 import type { Contract, Wallet } from "ethers";
-import { CONTRACT_ADDRESSES, CONTRACTS, PRIVATE_KEY, RPC_URL, POOL_KEYS, SALT_LIMITORDER, PRICE_LIMIT } from "../../../config/uniswap.config";
+import { CONTRACT_ADDRESSES, PRIVATE_KEY, RPC_URL, POOL_KEYS, SALT_LIMITORDER, PRICE_LIMIT } from "../../../config/uniswap.config";
 import { getCurrentTick, getPoolPrice } from "../lib/pool";
 import { getERC20Balance, isApproved, approveERC20 } from "../lib/ERC20";
 import { calculateTickFromPriceWithSpacing, calculatePriceFromTick, getSqrtPriceAtTick, liquidity0, liquidity1, amount0 } from "../lib/liqCalculation";
 import { PoolKey } from "../lib/types";
-import { ethers } from "hardhat";
-import { getContract } from "../lib/wallet";
+import { ethers } from "ethers";
+import { getContract } from "../lib/contract";
 
 async function placeLimitOrder(contract: Contract, poolKey: any, tickLower: number, zeroForOne: boolean, liquidity: BigInt): Promise<any> {
     const tx = await contract.place(poolKey, tickLower, zeroForOne, liquidity);
