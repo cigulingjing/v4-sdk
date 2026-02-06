@@ -1,11 +1,10 @@
-import { Contract, Wallet } from "ethers";
-import { ethers } from "hardhat";
-import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, PRIVATE_KEY, RPC_URL, SALT_LIMITORDER, PRICE_LIMIT } from "../../../config/uniswap.config";
+import { Contract, providers, Wallet } from "ethers";
+import { CONTRACT_ADDRESSES, POOL_KEYS, PRIVATE_KEY, RPC_URL, PRICE_LIMIT } from "../../../config/uniswap.config";
 import { calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
 import { PoolKey } from "../lib/types";
 import { getERC20Balance } from "../lib/ERC20";
 import { getPoolPrice } from "../lib/pool";
-import { getContract } from "../lib/wallet";
+import { getContract } from "../lib/contract";
 
 async function killLimitOrderFrontend(sender: string, priceLimit: number, poolkey: PoolKey, wallet: Wallet) {
     const liqPool = await getContract(wallet, "LiquidPool");
@@ -44,7 +43,7 @@ async function killLimitOrderFrontend(sender: string, priceLimit: number, poolke
 }
 
 async function main(): Promise<void> {
-    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+    const provider = new providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
     const token0 = await getContract(wallet, "Token0");

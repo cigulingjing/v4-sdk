@@ -1,19 +1,19 @@
-import { Contract, Wallet } from "ethers";
-import { ethers } from "hardhat";
-import { CONTRACT_ADDRESSES, CONTRACTS, POOL_KEYS, RPC_URL, PRIVATE_KEY, SALT } from "../../../config/uniswap.config";
+import { Contract, Wallet,providers } from "ethers";
+import { CONTRACT_ADDRESSES, POOL_KEYS, RPC_URL, PRIVATE_KEY, SALT } from "../../../config/uniswap.config";
 import { getPoolPrice, getPoolSqrtPrice, modifyPosition } from "../lib/pool";
 import { getERC20Balance, isApproved, approveERC20 } from "../lib/ERC20";
 import { calculateLiqDelta, calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
 import { ModifyPositionParams } from "../lib/types";
+import { getContract } from "../lib/contract";
 
-async function removeLiq(liqPool: Contract, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: any): Promise<void> {
-
+async function removeLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: any): Promise<void> {
     const ticklow = calculateTickFromPriceWithSpacing(priceLower, poolKey.tickSpacing);
     const tickhigh = calculateTickFromPriceWithSpacing(priceUpper, poolKey.tickSpacing);
+    const liqPool = await getContract(wallet, "LiquidPool");
+
     const sqrtCurrent = await getPoolSqrtPrice(liqPool);
     const [liqDelta, amount0Rmv, amount1Rmv] = calculateLiqDelta(ticklow, sqrtCurrent, tickhigh, amount0, amount1);
     console.log(`Attempting to remove liquidity ${liqDelta} to price range [${priceLower}, ${priceUpper}] with amount0[${amount0Rmv.toString()}], amount1[${amount1Rmv.toString()}]`);
-
     const modifyPositionParams: ModifyPositionParams = {
         tickLower: ticklow,
         tickUpper: tickhigh,
@@ -23,14 +23,15 @@ async function removeLiq(liqPool: Contract, priceLower: number, priceUpper: numb
 }
 
 async function main(): Promise<void> {
-    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+    const provider = new providers.JsonRpcProvider(RPC_URL);
     const wallet = new Wallet(PRIVATE_KEY, provider);
 
     const liqPoolAddress = CONTRACT_ADDRESSES.LiquidPool;
 
-    const token0 = await ethers.getContractAt("MockERC20", CONTRACT_ADDRESSES.Token0, wallet);
-    const token1 = await ethers.getContractAt("MockERC20", CONTRACT_ADDRESSES.Token1, wallet);
-    const liqPool = await ethers.getContractAt(CONTRACTS['LiquidPool'].abi, liqPoolAddress, wallet);
+    const token0 = await getContract(wallet, "Token0");
+    const token1 = await getContract(wallet, "Token1");
+    const liqPool = await getContract(wallet, "LiquidPool");
+
 
     let poolPrice = await getPoolPrice(liqPool);
     console.log(`Current price of pool ${liqPool.address} before removing liquidity is ${poolPrice}`);
@@ -45,7 +46,7 @@ async function main(): Promise<void> {
     const amount0 = 100n;
     const amount1 = 100n;
 
-    await removeLiq(liqPool, priceLower, priceUpper, amount0, amount1, POOL_KEYS.limitOrderPoolKey);
+    await removeLiq(wallet, priceLower, priceUpper, amount0, amount1, POOL_KEYS.limitOrderPoolKey);
 
     poolPrice = await getPoolPrice(liqPool);
     console.log(`Current price of pool ${liqPool.address} after removing liquidity is ${poolPrice}`);

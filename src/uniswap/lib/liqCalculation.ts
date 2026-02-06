@@ -132,13 +132,17 @@ export function calculateLiqDelta(ticklow: number, sqrt_cur: bigint, tickupp: nu
     const sqrt_upp = getSqrtPriceAtTick(tickupp);
     // console.log(`sqrt_low: ${sqrt_low}, sqrt_upp: ${sqrt_upp}, sqrt_cur: ${sqrt_cur}`);
 
+ 
     if (sqrt_low > sqrt_cur) {
+        // 当前价格比最低价格还要小，流动性按照token0数量计算
         const liq0 = liquidity0(amt0, sqrt_low, sqrt_upp);
         return [liq0, amount0(liq0, sqrt_low, sqrt_upp), BigInt(0)];
     } else if (sqrt_cur > sqrt_upp) {
+        // 当前价格比最高价格还要高，流动性按照token1数量计算
         const liq1 = liquidity1(amt1, sqrt_upp, sqrt_low);
         return [liq1, BigInt(0), amount1(liq1, sqrt_low, sqrt_upp)];
     } else {
+        // 按照流动性最高的来计算
         const liq0 = liquidity0(amt0, sqrt_cur, sqrt_upp);
         const liq1 = liquidity1(amt1, sqrt_cur, sqrt_low);
 
