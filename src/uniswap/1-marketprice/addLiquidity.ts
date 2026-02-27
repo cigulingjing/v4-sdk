@@ -6,7 +6,7 @@ import { ModifyPositionParams, PoolKey } from "../lib/types";
 import { getPoolPrice, getPoolSqrtPrice, modifyPosition } from "../lib/pool";
 import { getERC20Balance, isApproved, approveERC20 } from "../lib/ERC20";
 import { calculateLiqDelta, calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
-import { getContract } from "../lib/wallet";
+import { getContract } from "../lib/contract";
 
 async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: PoolKey): Promise<void> {
     // 合约对象实例化

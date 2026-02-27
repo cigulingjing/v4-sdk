@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import { deployHookWithFlags } from "./help";
-import { CONTRACT_ADDRESSES, RPC_URL, PRIVATE_KEY } from "../../../config/uniswap.config";
+import { CONTRACT_ADDRESSES, RPC_URL, PRIVATE_KEY } from "../../config/uniswap.config";
 import { Wallet } from "ethers";
 
 // Define the extended flags

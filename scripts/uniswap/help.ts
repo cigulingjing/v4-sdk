@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import type { Contract } from "ethers";
-import { CONTRACTS } from "../../../config/uniswap.config";
-import { bigintToBytes32, bytecodeWithArgs } from "../../../src/uniswap/lib/utils";
+import { CONTRACTS } from "../../config/uniswap.config";
+import { bigintToBytes32, bytecodeWithArgs } from "../../src/uniswap/lib/utils";
 
 // Constants that correspond to the ones in Solidity
 const FLAG_MASK = BigInt(0x3FFF);

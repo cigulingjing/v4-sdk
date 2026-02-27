@@ -91,26 +91,19 @@ export async function getAllVouchers(
 }
 
 // 仅仅能够在punk链上使用
-function buildUseVoucherPrefix(voucherNameBytes32: string): string {
-	const nameHex = utils.hexlify(voucherNameBytes32).replace(
-		/^0x/,
-		""
-	);
-    
-	if (nameHex.length > 64) {
-		throw new Error("Voucher name too long for 32 bytes");
-	}
-	const paddedName = nameHex.padEnd(64, "0");
-    console.log(paddedName)
-	return `0x0A0D03${paddedName}`;
+function buildUseVoucherPrefix(voucherNameBytes32: string, serviceNameBytes32: string): string {
+	const nameHex = utils.hexlify(voucherNameBytes32).replace(/^0x/, "");
+	const serviceHex = utils.hexlify(serviceNameBytes32).replace(/^0x/, "");
+	return `0x0A0D03${nameHex}${serviceHex}`;
 }
 
 // 仅仅能够在punk链上使用
 export function BuildUseVoucherTx(
 	tx: providers.TransactionRequest,
-	voucherName: string
+	voucherNameBytes32: string,
+	serviceNameBytes32: string,
 ): providers.TransactionRequest {
-	const prefix = buildUseVoucherPrefix(voucherName);
+	const prefix = buildUseVoucherPrefix(voucherNameBytes32, serviceNameBytes32);
 	const rawData = tx.data ?? "0x";
 	const dataHex = utils.hexlify(rawData);
 	const mergedData = utils.hexConcat([prefix, dataHex]);

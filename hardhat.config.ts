@@ -9,8 +9,9 @@ dotenv.config();
 const config: HardhatUserConfig = {
   networks: {
     punk: {
-      url: process.env.RPC_URL || "http://127.0.0.1:8545",
+      url: process.env.RPC_URL || "http://127.0.0.1:8666",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      blockGasLimit: 8000000,
     }
   },
   solidity: {

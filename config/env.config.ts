@@ -11,11 +11,18 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 export interface EnvConfig {
     // RPC 和钱包配置
     rpc: {
-        url: string;
+        localUrl: string;
+        punkUrl:string;
     };
     wallet: {
-        privateKey: string;
-        address: string;
+        local:{
+            privateKey: string;
+            address: string;
+        }
+        punk:{
+            privateKey: string;
+            address: string;
+        }
     };
 
     // 合约地址配置
@@ -132,17 +139,31 @@ function loadConfig(): EnvConfig {
 
     return {
         rpc: {
-            url: getEnvValue("RPC_URL", "http://127.0.0.1:8545/"),
+            localUrl: getEnvValue("RPC_URL", "http://127.0.0.1:8545/"),
+            punkUrl: getEnvValue("PUNK_RPC_URL", "http://127.0.0.1:8666")
         },
         wallet: {
-            privateKey: getEnvValue(
-                "PRIVATE_KEY",
-                "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-            ),
-            address: getEnvValue(
-                "ACCOUNT_ADDR",
-                "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-            ),
+            local:{
+                privateKey: getEnvValue(
+                    "PRIVATE_KEY",
+                "http://127.0.0.1:8545/"
+                ),
+                address: getEnvValue(
+                    "ACCOUNT_ADDR",
+                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+                ),
+            },
+            punk:{
+                privateKey: getEnvValue(
+                    "PUNK_PRIVATE_KEY",
+                    "0x6c19b85fa2d365e74b4b36556e1369fb9d680789e6e9350f9b62412efe3a76cc"
+                ),
+                address: getEnvValue(
+                    "PUNK_ACCOUNT_ADDR",
+                    "0x9748b3f8B628f11abD2474085DD44F8ffD8EB3e6"
+                ),
+            }
+            
         },
         contracts: {
             mutiVoucher:getEnvValue("MutiVoucher",""),
@@ -198,7 +219,13 @@ function loadConfig(): EnvConfig {
  * 导出配置对象
  */
 export const config: EnvConfig = loadConfig();
-export const RPC_URL = config.rpc.url;
-export const PRIVATE_KEY = config.wallet.privateKey;
-export const ACCOUNT_ADDR = config.wallet.address;
+export const RPC_URL = config.rpc.localUrl;
+export const PRIVATE_KEY = config.wallet.local.privateKey;
+export const ACCOUNT_ADDR = config.wallet.local.address;
+
+export const PUNK_RPC_URL = config.rpc.punkUrl;
+export const PUNK_PRIVATE_KEY = config.wallet.punk.privateKey;
+export const PUNK_ACCOUNT_ADDR = config.wallet.punk.address;
+
+
 

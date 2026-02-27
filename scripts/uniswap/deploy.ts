@@ -1,18 +1,28 @@
 import { ethers } from "hardhat";
-import type { Contract } from "ethers";
-import {  POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES, INITIAL_SUPPLY } from "../../../config/uniswap.config";
-import { isDeployed, bigintToBytes32, abiEncode } from "../../../src/uniswap/lib/utils";
-import { mintERC20 } from "../../../src/uniswap/lib/ERC20";
+import type { Contract,providers } from "ethers";
+import {  POOL_KEYS, RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESSES, INITIAL_SUPPLY } from "../../config/uniswap.config";
+import { isDeployed, bigintToBytes32, abiEncode } from "../../src/uniswap/lib/utils";
+import { mintERC20 } from "../../src/uniswap/lib/ERC20";
 import { create2Deploy, deployHookWithFlags } from "./help";
 import { deployMockERC20 } from "./deploy_mockERC20";
 import { deployDynamic, deployLimitOrder } from "./deploy_hooks";
 import { deployCreate2 } from "./deploy_create2";
 
+const CONNECTION_TIMEOUT_MS = 10_000;
+
+async function assertRpcConnection(provider: providers.JsonRpcProvider, rpcUrl: string) {
+    const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`RPC connection timed out after ${CONNECTION_TIMEOUT_MS}ms: ${rpcUrl}`)), CONNECTION_TIMEOUT_MS)
+    );
+    await Promise.race([provider.getBlockNumber(), timeout]);
+}
+
 async function main() {
+    console.log("RPC_URL:", RPC_URL);
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+    await assertRpcConnection(provider, RPC_URL);
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
     const walletAddress = await wallet.getAddress();
-
     // 1. Deploy Create2 factory 
     const create2Address = await deployCreate2(wallet);
     if (!await isDeployed(provider, create2Address)) throw new Error("Factory is not deployed");
