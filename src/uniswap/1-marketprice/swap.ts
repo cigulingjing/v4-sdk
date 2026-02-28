@@ -94,7 +94,9 @@ export async function main(): Promise<void> {
 }
 
 // Run the main function
-main().catch((error) => {
-    console.error(error);
-    process.exit(1);
-});
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
+    main().catch((error) => {
+        console.error(error);
+        process.exit(1);
+    });
+}

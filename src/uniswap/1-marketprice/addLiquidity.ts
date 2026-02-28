@@ -73,7 +73,9 @@ async function main(): Promise<void> {
     console.log("Token1 change:", token1After - token1Before);
 }
 
-main().catch((error) => {
-    console.error(error);
-    process.exit(1);
-});
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
+    main().catch((error) => {
+        console.error(error);
+        process.exit(1);
+    });
+}
