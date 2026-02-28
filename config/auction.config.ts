@@ -26,7 +26,7 @@ const AUCTION_ABI = {
 export { RPC_URL, PRIVATE_KEY };
 export { AUCTION_ADDR,AUCTION_ABI};
 
-if (require.main === module) {
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
     console.log("=== Auction 配置验证 ===\n");
     console.log("合约地址:");
     console.log("ChainYVaultV2:", chainYVaultV2Addr);

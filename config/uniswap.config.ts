@@ -73,7 +73,7 @@ const POOL_KEYS = {
 };
 
 
-if (require.main === module) {
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
   console.log("=== Uniswap 配置验证 ===\n");
 
   console.log("\n合约地址:");
