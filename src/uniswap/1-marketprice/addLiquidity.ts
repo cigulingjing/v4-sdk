@@ -12,7 +12,7 @@ import { getContract } from "../lib/contract";
 
 
 
-async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: PoolKey): Promise<void> {
+export async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: PoolKey): Promise<void> {
     // 合约对象实例化
     const token0 = await getContract(wallet, "Token0");
     const token1 = await getContract(wallet, "Token1");
