@@ -1,9 +1,9 @@
-import * as dotenv from "dotenv";
+// import * as dotenv from "dotenv";
 import { ethers } from "ethers";
-import * as path from "path";
+// import * as path from "path";
 
 // 加载环境变量
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+// const env = dotenv.config({ path: path.resolve(__dirname, "../.env") }).parsed || {};
 
 /**
  * 环境变量配置接口定义
@@ -74,8 +74,14 @@ export interface EnvConfig {
  * 从环境变量中获取值,如果不存在则使用默认值
  */
 function getEnvValue(key: string, defaultValue: string): string {
+    // const envDefine = Object.keys(env).reduce((acc: Record<string, string>, curr) => {
+    //     acc[`${curr}`] = JSON.stringify(env[curr] || process.env[curr]);
+    //     return acc;
+    // }, {});
+    // console.log(`Loaded environment variables: ${JSON.stringify(envDefine)}`);
     const value = process.env[key];
     if (value === undefined || value === "") {
+        console.log(`Environment variable ${key} is not set, using default value: ${defaultValue}`);
         return defaultValue;
     }
     return value;
