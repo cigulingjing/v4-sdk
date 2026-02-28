@@ -144,7 +144,7 @@ export function buildChainXUnlockReceipt({
 }
 
 // 仅在直接运行本文件时演示生成 rawReceipt，避免被 require 时产生副作用
-if (require.main === module) {
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
     const stauts = 0x01;
     const gasUsed = BigInt(21000);
     const gasPrice = BigInt(21000);

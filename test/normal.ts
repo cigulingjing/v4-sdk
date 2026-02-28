@@ -38,6 +38,6 @@ function main(){
     // getCode(CONTRACT_ADDRESSES.DynamicFee);
 }
 
-if (require.main === module){
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module){
     main(); 
 }

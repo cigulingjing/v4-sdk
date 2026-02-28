@@ -65,6 +65,6 @@ async function main() {
     await ERC20Initial(wallet,"Token1", walletAddress, supply);
 }
 
-if (require.main === module) {
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
     main();
 }

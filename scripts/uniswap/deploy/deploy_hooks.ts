@@ -69,6 +69,6 @@ async function deployDemo(){
     }
 }
 
-if (require.main === module) {
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
     deployDemo();
 }

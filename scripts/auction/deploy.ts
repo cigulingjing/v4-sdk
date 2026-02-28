@@ -18,6 +18,6 @@ async function main(){
     console.log(`ChainXAuctionV2 Address: ${xAuctionAddr}`);
 };
 
-if (require.main === module) {
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
     main();
 }

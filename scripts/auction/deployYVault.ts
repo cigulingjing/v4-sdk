@@ -17,6 +17,6 @@ async function main(){
     console.log("ChainYVaultV2 deployed to:", yVaultAddr);
 };
 
-if (require.main === module) {
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
     main();
 }
