@@ -4,7 +4,13 @@ import {
   RPC_URL,
   PRIVATE_KEY,
 } from "./env.config";
-import {join} from "path";
+import PoolManagerABI from "../artifacts/@uniswap/v4-core/src/PoolManager.sol/PoolManager.json";
+import MockERC20ABI from "../artifacts/contracts/uniswap/MockERC20.sol/MockERC20.json";
+import LiquidPoolABI from "../artifacts/contracts/uniswap/LiquidPool.sol/LiquidPool.json";
+import LimitOrderABI from "../artifacts/contracts/uniswap/LimitOrder.sol/LimitOrder.json";
+import DynamicFeeABI from "../artifacts/contracts/uniswap/DynamicFee.sol/DynamicFee.json";
+import Create2ABI from "../artifacts/contracts/uniswap/Create2.sol/Create2.json";
+import ExampleABI from "../artifacts/contracts/uniswap/Example.sol/Example.json";
 
 
 
@@ -27,21 +33,15 @@ const CONTRACT_ADDRESSES = {
 };
 
 // ============================== Contract ABIs ============================================
-function relativePath(filepath:string):string{
-  const ROOT = '..';
-  return join(ROOT,filepath)
-}
-// Uniswap ABI 路径
-const ABI_PATHS = config.abiPaths.uniswap;
 
 const CONTRACTS_ABI={
-  PoolManager: require(relativePath(ABI_PATHS.poolManager)),
-  MockERC20: require(relativePath(ABI_PATHS.mockERC20)),
-  LiquidPool: require(relativePath(ABI_PATHS.liquidPool)),
-  LimitOrder: require(relativePath(ABI_PATHS.limitOrder)),
-  DynamicFee: require(relativePath(ABI_PATHS.dynamicFee)),
-  Create2: require(relativePath(ABI_PATHS.create2)),
-  Example: require(relativePath(ABI_PATHS.example)),
+  PoolManager: PoolManagerABI,
+  MockERC20: MockERC20ABI,
+  LiquidPool: LiquidPoolABI,
+  LimitOrder: LimitOrderABI,
+  DynamicFee: DynamicFeeABI,
+  Create2: Create2ABI,
+  Example: ExampleABI,
 }
 
 // ============================== Pool Keys ================================================
@@ -75,15 +75,6 @@ const POOL_KEYS = {
 
 if (require.main === module) {
   console.log("=== Uniswap 配置验证 ===\n");
-
-  console.log("ABI 路径:");
-  console.log("- PoolManager:", ABI_PATHS.poolManager);
-  console.log("- MockERC20:", ABI_PATHS.mockERC20);
-  console.log("- LiquidPool:", ABI_PATHS.liquidPool);
-  console.log("- LimitOrder:", ABI_PATHS.limitOrder);
-  console.log("- DynamicFee:", ABI_PATHS.dynamicFee);
-  console.log("- Create2:", ABI_PATHS.create2);
-  console.log("- Example:", ABI_PATHS.example);
 
   console.log("\n合约地址:");
   console.log("- Token0:", CONTRACT_ADDRESSES.Token0);

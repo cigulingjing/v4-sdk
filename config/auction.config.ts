@@ -3,7 +3,9 @@ import {
   PRIVATE_KEY,
   config,
 } from "./env.config";
-import {join} from "path";
+import CoinbaseABI from "../artifacts/contracts/auction/coinbase-and-stake/coinbase.sol/Coinbase.json";
+import ChainXAuctionV2ABI from "../artifacts/contracts/auction/ChainXAuctionV2.sol/ChainXAuctionV2.json";
+import ChainYVaultV2ABI from "../artifacts/contracts/auction/ChainYVaultV2.sol/ChainYVaultV2.json";
 
 const chainXAuctionV2Addr=config.contracts.auction.chainXAuctionV2;
 const chainYVaultV2Addr=config.contracts.auction.chainYVaultV2;
@@ -15,17 +17,10 @@ const AUCTION_ADDR={
   coinbase:coinbaseAddr,
 }
 
-// ABI路径
-const ABI_PATHS = config.abiPaths.auction;
-function relativePath(filepath:string):string{
-  const ROOT = '..';
-  return join(ROOT,filepath)
-}
-
 const AUCTION_ABI = {
-  coinbase: require(relativePath(ABI_PATHS.coinbase)),
-  chainXAuction: require(relativePath(ABI_PATHS.chainXAuction)),
-  chainYVault: require(relativePath(ABI_PATHS.chainYVault)),
+  coinbase: CoinbaseABI,
+  chainXAuction: ChainXAuctionV2ABI,
+  chainYVault: ChainYVaultV2ABI,
 } as const;
 
 export { RPC_URL, PRIVATE_KEY };
