@@ -1,9 +1,7 @@
-import * as dotenv from "dotenv";
+// import * as dotenv from "dotenv";
 import { ethers } from "ethers";
-import * as path from "path";
 
-// 加载环境变量
-const env = dotenv.config({ path: path.resolve(__dirname, "../.env") }).parsed || {};
+// const env = dotenv.config({ path: path.resolve(__dirname, "../.env") }).parsed || {};
 
 /**
  * 环境变量配置接口定义
@@ -74,14 +72,9 @@ export interface EnvConfig {
  * 从环境变量中获取值,如果不存在则使用默认值
  */
 function getEnvValue(key: string, defaultValue: string): string {
-    const envDefine = Object.keys(env).reduce((acc: Record<string, string>, curr) => {
-        acc[`process.env.${curr}`] = JSON.stringify(env[curr] || process.env[curr]);
-        return acc;
-    }, {});
-    console.log(`Loaded environment variables: ${JSON.stringify(envDefine)}`);
     const value = process.env[key];
     if (value === undefined || value === "") {
-        console.log(`Environment variable ${key} is not set, using default value: ${defaultValue}`);
+        console.warn(`Environment variable ${key} is not set, using default value: ${defaultValue}`);
         return defaultValue;
     }
     return value;
@@ -151,20 +144,20 @@ function loadConfig(): EnvConfig {
             ),
         },
         contracts: {
-            mutiVoucher:getEnvValue("MutiVoucher",""),
+            mutiVoucher:getEnvValue("MutiVoucher","0x0000000000000000000000000000000000000044"),
             auction: {
-                chainYVaultV2: getEnvValue("ChainYVaultV2", ""),
-                chainXAuctionV2: getEnvValue("ChainXAuctionV2", ""),
-                coinbase: getEnvValue("Coinbase", ""),
+                chainYVaultV2: getEnvValue("ChainYVaultV2", "0xAa9e62EB6d74d66Ff6720D1A8143c8237067Ff58"),
+                chainXAuctionV2: getEnvValue("ChainXAuctionV2", "0x88566F811b751Fa527A0816d99d6968E00f2eBef"),
+                coinbase: getEnvValue("Coinbase", "0xAa9e62EB6d74d66Ff6720D1A8143c8237067Ff58"),
             },
             uniswap: {
-                create2: getEnvValue("Create2", "0x5FbDB2315678afecb367f032d93F642f64180aa3"),
-                token0: getEnvValue("Token0", "0x3e7B83B8bb8eE2D4d74ec805aeb1465e65E15E24"),
-                token1: getEnvValue("Token1", "0xF4DB8B5cC187B286Eb54Bf76c6b041286a46E4Ee"),
-                poolManager: getEnvValue("PoolManager", "0xDB0412DaB8210ccA6d9875eE0be7b580A3c12046"),
-                liquidPool: getEnvValue("LiquidPool", "0xBFd16A06062060FA08EFca22e3b6d334EcF3E2f0"),
-                limitOrder: getEnvValue("LimitOrder", "0x7982Cd1B4162c145e6c1a0f7fD3De4676950D040"),
-                dynamicFee: getEnvValue("DynamicFee", "0x541eEcD8E9A59476E436A766123B27330e149040"),
+                create2: getEnvValue("Create2", "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"),
+                token0: getEnvValue("Token0", "0x3E8d9Ad590542AE8731960202CE0334B5c7c317D"),
+                token1: getEnvValue("Token1", "0xF8407E61094a14601a7224AB628152B309788659"),
+                poolManager: getEnvValue("PoolManager", "0xEEB0F62083f9bcF1e161ABb1889E9c4C14b74D46"),
+                liquidPool: getEnvValue("LiquidPool", "0x6E454E4110Cb7FD3D77e43Fb02D52f8D49fa78e6"),
+                limitOrder: getEnvValue("LimitOrder", "0x865d655032B0532a6D15EC26cBC23B9F49121040"),
+                dynamicFee: getEnvValue("DynamicFee", "0x69dbAac488aa6cA7e023316D610c9B9327e85040"),
             },
         },
         abiPaths: {
