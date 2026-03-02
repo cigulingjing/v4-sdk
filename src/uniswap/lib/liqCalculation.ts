@@ -34,6 +34,7 @@ function getAbsTick(tick: bigint): bigint {
 }
 
 export function getSqrtPriceAtTick(tick: number): bigint {
+    // const safeTick = Math.floor(tick);
     const absTick: bigint = getAbsTick(BigInt(tick));
 
     if (absTick > MAX_TICK) {
@@ -146,7 +147,7 @@ export function calculateLiqDelta(ticklow: number, sqrt_cur: bigint, tickupp: nu
         const liq0 = liquidity0(amt0, sqrt_cur, sqrt_upp);
         const liq1 = liquidity1(amt1, sqrt_cur, sqrt_low);
 
-        const liq = liq0 < liq1 ? liq1 : liq0;
+        const liq = liq0 < liq1 ? liq0 : liq1;
         return [liq, amount0(liq, sqrt_cur, sqrt_upp), amount1(liq, sqrt_low, sqrt_cur)];
     }
 }
