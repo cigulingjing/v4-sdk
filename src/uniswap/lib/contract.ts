@@ -8,6 +8,7 @@ function getAbi(artifact: any): any[] {
 }
 
 export async function getContract(wallet:Wallet, name:string): Promise<Contract> {
+    console.log(`Getting contract `, name, CONTRACT_ADDRESSES.LiquidPool);
     switch(name){
         case "Token0":
             return new ethers.Contract(CONTRACT_ADDRESSES.Token0, getAbi(CONTRACTS_ABI.MockERC20), wallet);
