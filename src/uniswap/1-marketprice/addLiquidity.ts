@@ -8,19 +8,37 @@ import { calculateLiqDelta, calculateTickFromPriceWithSpacing } from "../lib/liq
 import { getContract } from "../lib/contract";
 
 
-
-
-
-
 export async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: PoolKey): Promise<void> {
     // 合约对象实例化
     const token0 = await getContract(wallet, "Token0");
     const token1 = await getContract(wallet, "Token1");
     const liqPool = await getContract(wallet, "LiquidPool");
 
-    const ticklow = calculateTickFromPriceWithSpacing(priceLower, poolKey.tickSpacing);
+    console.log(`[SDK] Validating network and wallet...`);
+    if (wallet.provider) {
+        const net = await wallet.provider.getNetwork();
+        console.log(`[SDK] Wallet connected to chainId: ${net.chainId}`);
+    } else {
+        console.warn(`[SDK] Wallet has no provider attached!`);
+    }
+
+    const ticklow = calculateTickFromPriceWithSpacing(priceLower, poolKey.tickSpacing); 
     const tickhigh = calculateTickFromPriceWithSpacing(priceUpper, poolKey.tickSpacing);
-    const sqrtCurrent = await getPoolSqrtPrice(liqPool);
+
+    let sqrtCurrent: bigint;
+    try {
+        console.log(`[SDK] Fetching sqrtPrice from LiquidPool (${liqPool.address})...`);
+        // Force a call verification
+        sqrtCurrent = await getPoolSqrtPrice(liqPool);
+        console.log(`[SDK] SqrtPrice fetched: ${sqrtCurrent}`);
+    } catch (e) {
+        console.error(`[SDK] Failed to fetch sqrtPrice. Attempting diagnosis...`);
+        // Check if code exists (again, but verbose)
+        const code = await wallet.provider.getCode(liqPool.address);
+        console.log(`[SDK] Code length at ${liqPool.address}: ${code.length}`);
+        
+        throw e;
+    }
 
     const [liqDelta, amount0Add, amount1Add] = calculateLiqDelta(ticklow, sqrtCurrent, tickhigh, amount0, amount1);
 
