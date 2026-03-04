@@ -34,6 +34,29 @@ async function main() {
         const sqrtPrice = await getPoolSqrtPrice(liquidPoolContract);
         console.log("Successfully fetched pool price:", price);
         console.log("Successfully fetched pool sqrt price:", sqrtPrice);
+
+        // Fetch pool token balances
+        const token0Address = config.contracts.uniswap.token0;
+        const token1Address = config.contracts.uniswap.token1;
+        const poolManagerAddress = config.contracts.uniswap.poolManager;
+
+        // Note: In V4, tokens are held by the PoolManager (typically), not the LiquidPool itself directly, 
+        // OR the LiquidPool might hold them if it's not fully using PoolManager singleton for storage.
+        // But usually funds are in PoolManager. Let's check PoolManager's balance of Token0 and Token1.
+        
+        const erc20Abi = [
+            "function balanceOf(address owner) view returns (uint256)"
+        ];
+        const token0Contract = new ethers.Contract(token0Address, erc20Abi, wallet);
+        const token1Contract = new ethers.Contract(token1Address, erc20Abi, wallet);
+
+        console.log("Checking PoolManager token balances...");
+        const pmBalance0 = await token0Contract.balanceOf(poolManagerAddress);
+        const pmBalance1 = await token1Contract.balanceOf(poolManagerAddress);
+
+        console.log(`PoolManager Token0 Balance: ${ethers.utils.formatEther(pmBalance0)}`);
+        console.log(`PoolManager Token1 Balance: ${ethers.utils.formatEther(pmBalance1)}`);
+
     } catch (error) {
         console.error("Error fetching pool price:", error);
     }
