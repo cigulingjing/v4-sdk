@@ -8,7 +8,7 @@ import { calculateLiqDelta, calculateTickFromPriceWithSpacing } from "../lib/liq
 import { getContract } from "../lib/contract";
 
 
-export async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint | number, amount1: bigint | number, poolKey: PoolKey): Promise<void> {
+export async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint | number, amount1: bigint | number, poolKey: PoolKey): Promise<ethers.providers.TransactionReceipt> {
     // 合约对象实例化
     const token0 = await getContract(wallet, "Token0");
     const token1 = await getContract(wallet, "Token1");
@@ -62,7 +62,8 @@ export async function addLiq(wallet: Wallet, priceLower: number, priceUpper: num
         await approveERC20(token1, liqPoolAddr, amount1Add);
     }
 
-    await modifyPosition(liqPool, modifyPositionParams, "0x00");
+    const receipt = await modifyPosition(liqPool, modifyPositionParams, "0x00");
+    return receipt;
 }
 
 async function main(): Promise<void> {

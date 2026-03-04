@@ -5,7 +5,8 @@ import { PoolKey, ModifyPositionParams } from "./types";
 export async function modifyPosition(contract: Contract, modifyPositionParams: ModifyPositionParams, hookData: string) {
     // Add liquidity
     const tx = await contract.addLiquidity(modifyPositionParams, hookData);
-    await tx.wait();
+    const receipt = await tx.wait();
+    return receipt;
 }
 
 // Function to get Pool ID
