@@ -8,11 +8,14 @@ import { calculateLiqDelta, calculateTickFromPriceWithSpacing } from "../lib/liq
 import { getContract } from "../lib/contract";
 
 
-export async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: PoolKey): Promise<void> {
+export async function addLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint | number, amount1: bigint | number, poolKey: PoolKey): Promise<void> {
     // 合约对象实例化
     const token0 = await getContract(wallet, "Token0");
     const token1 = await getContract(wallet, "Token1");
     const liqPool = await getContract(wallet, "LiquidPool");
+
+    const amount0Big = BigInt(amount0);
+    const amount1Big = BigInt(amount1);
 
     console.log(`[SDK] Validating network and wallet...`);
     if (wallet.provider) {
@@ -40,7 +43,7 @@ export async function addLiq(wallet: Wallet, priceLower: number, priceUpper: num
         throw e;
     }
 
-    const [liqDelta, amount0Add, amount1Add] = calculateLiqDelta(ticklow, sqrtCurrent, tickhigh, amount0, amount1);
+    const [liqDelta, amount0Add, amount1Add] = calculateLiqDelta(ticklow, sqrtCurrent, tickhigh, amount0Big, amount1Big);
 
     let modifyPositionParams: ModifyPositionParams = {
         tickLower: ticklow,
