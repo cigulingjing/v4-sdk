@@ -177,7 +177,8 @@ async function executeSwap(contract: Contract, poolKey: PoolKey, swapParams: Swa
 }
 
 async function depolyContract(contractName: string, params?: any): Promise<Contract> {
-    const Factory = await ethers.getContractFactory(contractName);
+    // Note: getContractFactory is from hardhat-ethers, we cast to any to bypass type checking in dts build
+    const Factory = await (ethers as any).getContractFactory(contractName);
     let contract;
     if (params === undefined) {
         contract = await Factory.deploy();
