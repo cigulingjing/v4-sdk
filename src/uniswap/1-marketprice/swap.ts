@@ -9,9 +9,9 @@ import { getContract } from "../lib/contract";
 
 // Swap function that handles token approval and execution
 // amountIn代表投入的代币数量，获取到的数量不定
-export async function swap(wallet: Wallet, amountIn: bigint, zeroForOne: boolean, hookData: string): Promise<void> {
-    const token0 = await getContract(wallet,"MockERC20");
-    const token1 = await getContract(wallet,"MockERC20");
+export async function swap(wallet: Wallet, amountIn: bigint, zeroForOne: boolean, hookData: string): Promise<providers.TransactionReceipt> {
+    const token0 = await getContract(wallet,"Token0");
+    const token1 = await getContract(wallet,"Token1");
     const liqPool = await getContract(wallet,"LiquidPool");
 
     const priceCurrent = await getPoolPrice(liqPool);
@@ -49,7 +49,8 @@ export async function swap(wallet: Wallet, amountIn: bigint, zeroForOne: boolean
         await approveERC20(token, liqPool.address, constants.MaxUint256.toBigInt());
     }
     // Execute the swap
-    await executeSwap(liqPool, swapParams, hookData);
+    const receipt = await executeSwap(liqPool, swapParams, hookData);
+    return receipt;
 }
 
 // Main function to execute the swap and display results

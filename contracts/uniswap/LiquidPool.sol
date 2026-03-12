@@ -9,12 +9,13 @@ import {BalanceDelta} from '@uniswap/v4-core/src/PoolManager.sol';
 import {IUnlockCallback} from '@uniswap/v4-core/src/interfaces/callback/IUnlockCallback.sol';
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {CurrencyDelta, Currency} from '@uniswap/v4-core/src/libraries/CurrencyDelta.sol';
 import {TickMath} from '@uniswap/v4-core/src/libraries/TickMath.sol';
 import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 
 
-contract LiquidPool is IUnlockCallback {
+contract LiquidPool is IUnlockCallback, ERC721 {
     using SafeERC20 for IERC20;
     using CurrencyDelta for Currency;
     using StateLibrary for IPoolManager;
@@ -30,14 +31,32 @@ contract LiquidPool is IUnlockCallback {
         int256 liquidityDelta;
     }
 
+    struct Position {
+        int24 tickLower;
+        int24 tickUpper;
+        int256 liquidity;
+    }
+
+    struct PositionInfo {
+        uint256 tokenId;
+        int24 tickLower;
+        int24 tickUpper;
+        int256 liquidity;
+    }
+
     IPoolManager public immutable poolManager;
     PoolKey key;
 
     mapping(address => BalanceDelta) rewards;
 
+    uint256 public nextTokenId;
+    mapping(uint256 => Position) public positions;
+    mapping(bytes32 => uint256) public positionIdByHash;
+    mapping(address => uint256[]) public ownerTokens;
+
     error InvalidFuncSig();
 
-    constructor(IPoolManager _poolManager, PoolKey memory _key) {
+    constructor(IPoolManager _poolManager, PoolKey memory _key) ERC721("LiquidPool NFT", "LPNFT") {
         poolManager = _poolManager;
         key = _key;
     }
@@ -54,11 +73,28 @@ contract LiquidPool is IUnlockCallback {
         LiquidityParams calldata params, 
         bytes calldata hookData
     ) external {
+        bytes32 posHash = keccak256(abi.encode(msg.sender, params.tickLower, params.tickUpper));
+        uint256 tokenId = positionIdByHash[posHash];
+
+        if (tokenId == 0 && params.liquidityDelta > 0) {
+            tokenId = ++nextTokenId;
+            positionIdByHash[posHash] = tokenId;
+            positions[tokenId] = Position({
+                tickLower: params.tickLower,
+                tickUpper: params.tickUpper,
+                liquidity: params.liquidityDelta
+            });
+            _mint(msg.sender, tokenId);
+            ownerTokens[msg.sender].push(tokenId);
+        } else if (tokenId != 0) {
+            positions[tokenId].liquidity += params.liquidityDelta;
+        }
+
         ModifyLiquidityParams memory positionParams = ModifyLiquidityParams({
             tickLower: params.tickLower,
             tickUpper: params.tickUpper,
             liquidityDelta: params.liquidityDelta,
-            salt: bytes32(uint256(uint160(msg.sender)))
+            salt: posHash
         });
 
         _unlock(FUNCSIG_LIQUIDITY, abi.encode(positionParams, hookData));
@@ -66,6 +102,23 @@ contract LiquidPool is IUnlockCallback {
         poolManager.unlock(
             abi.encodeCall(this.addLiquidity, (positionParams, hookData))
         );*/
+
+    }
+
+    function getPosition(address owner) external view returns (PositionInfo[] memory) {
+        uint256[] memory tokens = ownerTokens[owner];
+        PositionInfo[] memory infos = new PositionInfo[](tokens.length);
+        for (uint256 i = 0; i < tokens.length; i++) {
+            uint256 tokenId = tokens[i];
+            Position storage pos = positions[tokenId];
+            infos[i] = PositionInfo({
+                tokenId: tokenId,
+                tickLower: pos.tickLower,
+                tickUpper: pos.tickUpper,
+                liquidity: pos.liquidity
+            });
+        }
+        return infos;
     }
 
     function executeSwap(
