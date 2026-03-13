@@ -15,6 +15,7 @@ export {
 // Export Uniswap modules
 export * from './uniswap/1-marketprice/swap';
 export * from './uniswap/1-marketprice/addLiquidity';
+export * from './uniswap/1-marketprice/getPositions';
 export * from './uniswap/3-dynamicfee/dynamicfee';
 export * from './uniswap/2-limitorder/place';
 export * from './uniswap/lib/contract';
