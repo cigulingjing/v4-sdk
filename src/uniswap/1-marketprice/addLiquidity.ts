@@ -17,13 +17,13 @@ export async function addLiq(wallet: Wallet, priceLower: number, priceUpper: num
     const amount0Big = BigInt(amount0);
     const amount1Big = BigInt(amount1);
 
-    console.log(`[SDK] Validating network and wallet...`);
-    if (wallet.provider) {
-        const net = await wallet.provider.getNetwork();
-        console.log(`[SDK] Wallet connected to chainId: ${net.chainId}`);
-    } else {
-        console.warn(`[SDK] Wallet has no provider attached!`);
-    }
+    // console.log(`[SDK] Validating network and wallet...`);
+    // if (wallet.provider) {
+    //     const net = await wallet.provider.getNetwork();
+    //     console.log(`[SDK] Wallet connected to chainId: ${net.chainId}`);
+    // } else {
+    //     console.warn(`[SDK] Wallet has no provider attached!`);
+    // }
 
     const ticklow = calculateTickFromPriceWithSpacing(priceLower, poolKey.tickSpacing); 
     const tickhigh = calculateTickFromPriceWithSpacing(priceUpper, poolKey.tickSpacing);
