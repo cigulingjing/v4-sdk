@@ -1,12 +1,41 @@
-import { Contract, Wallet,providers } from "ethers";
+import { Contract, Wallet, providers } from "ethers";
 import { CONTRACT_ADDRESSES, POOL_KEYS, RPC_URL, PRIVATE_KEY, SALT } from "../../../config/uniswap.config";
 import { getPoolPrice, getPoolSqrtPrice, modifyPosition } from "../lib/pool";
 import { getERC20Balance, isApproved, approveERC20 } from "../lib/ERC20";
 import { calculateLiqDelta, calculateTickFromPriceWithSpacing } from "../lib/liqCalculation";
-import { ModifyPositionParams } from "../lib/types";
+import { ModifyPositionParams, PoolKey } from "../lib/types";
 import { getContract } from "../lib/contract";
 
-async function removeLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: any): Promise<void> {
+/**
+ * Removes liquidity by directly specifying exact tick ranges and the liquidity delta to remove.
+ * This is primarily used when matching with the frontend's position data.
+ */
+export async function removeLiqByPosition(wallet: Wallet, tickLower: number, tickUpper: number, liquidityToRemove: bigint | string): Promise<providers.TransactionReceipt> {
+    const liqPool = await getContract(wallet, "LiquidPool");
+    
+    // Ensure liquidity is a positive BigInt before negating
+    let liqDelta = BigInt(liquidityToRemove.toString());
+    if (liqDelta > 0n) {
+        liqDelta = liqDelta * -1n;
+    }
+
+    console.log(`[SDK] Attempting to remove liquidity ${liqDelta} from ticks [${tickLower}, ${tickUpper}]`);
+
+    const modifyPositionParams: ModifyPositionParams = {
+        tickLower: tickLower,
+        tickUpper: tickUpper,
+        liquidityDelta: liqDelta,
+    };
+    
+    // Sending the transaction to the LiquidPool contract
+    const receipt = await modifyPosition(liqPool, modifyPositionParams, "0x00");
+    return receipt;
+}
+
+/**
+ * Legacy support: calculate liquidity to remove via token amount projections.
+ */
+export async function removeLiq(wallet: Wallet, priceLower: number, priceUpper: number, amount0: bigint, amount1: bigint, poolKey: PoolKey): Promise<providers.TransactionReceipt> {
     const ticklow = calculateTickFromPriceWithSpacing(priceLower, poolKey.tickSpacing);
     const tickhigh = calculateTickFromPriceWithSpacing(priceUpper, poolKey.tickSpacing);
     const liqPool = await getContract(wallet, "LiquidPool");
@@ -17,9 +46,10 @@ async function removeLiq(wallet: Wallet, priceLower: number, priceUpper: number,
     const modifyPositionParams: ModifyPositionParams = {
         tickLower: ticklow,
         tickUpper: tickhigh,
-        liquidityDelta: liqDelta * BigInt(-1),
+        liquidityDelta: liqDelta * -1n,
     };
-    await modifyPosition(liqPool, modifyPositionParams, "0x00");
+    const receipt = await modifyPosition(liqPool, modifyPositionParams, "0x00");
+    return receipt;
 }
 
 async function main(): Promise<void> {
