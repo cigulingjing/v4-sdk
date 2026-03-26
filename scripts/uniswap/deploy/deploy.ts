@@ -23,8 +23,8 @@ async function main() {
     const initialSupply = INITIAL_SUPPLY;
 
     // 1. Deploy ERC20 tokens
-    let token0Addr = await deployMockERC20("bitcoin", "btc", initialSupply);
-    let token1Addr = await deployMockERC20("ethereum", "eth", initialSupply);
+    let token0Addr = await deployMockERC20("bitcoin", "btc", initialSupply, create2Address);
+    let token1Addr = await deployMockERC20("ethereum", "eth", initialSupply, create2Address);
 
     // ensure token0Addr < token1Addr, for poolmanager poolkey check
     if (token0Addr > token1Addr) {
@@ -56,7 +56,23 @@ async function main() {
     console.log("liquidityPool = ", liquidityPoolAddr);
     console.log("limitOrder Hook = ", limitOrderAddress);
     console.log("dynamicFee Hook = ", dynamicAddress);
-    console.log("\nPlease update the CONTRACT_ADDRESSES in .env!\n");
+
+    // 6. Update addresses.json
+    const fs = require('fs');
+    const path = require('path');
+    const addressesPath = path.resolve(__dirname, '../../../config/addresses.json');
+    let addressesData = JSON.parse(fs.readFileSync(addressesPath, 'utf8'));
+
+    addressesData.uniswap.create2 = create2Address;
+    addressesData.uniswap.token0 = token0Addr;
+    addressesData.uniswap.token1 = token1Addr;
+    addressesData.uniswap.poolManager = poolManagerAddr;
+    addressesData.uniswap.liquidPool = liquidityPoolAddr;
+    addressesData.uniswap.limitOrder = limitOrderAddress;
+    addressesData.uniswap.dynamicFee = dynamicAddress;
+
+    fs.writeFileSync(addressesPath, JSON.stringify(addressesData, null, 2));
+    console.log("\nSuccess: addresses.json has been updated automatically!\n");
 }
 
 main().catch(error => {

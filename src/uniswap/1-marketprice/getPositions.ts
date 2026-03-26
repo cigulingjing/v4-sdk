@@ -36,9 +36,9 @@ export async function getUserPositions(wallet: Wallet, userAddress?: string): Pr
                 // liquidity is int256, keep as string to prevent JS precision loss
                 liquidity: pos.liquidity.toString()
             };
-        });
+        }).filter(pos => pos.liquidity !== "0"); // Filter out empty positions
 
-        console.log(`[SDK] Found ${formattedPositions.length} position(s).`);
+        console.log(`[SDK] Found ${formattedPositions.length} active position(s).`);
         return formattedPositions;
 
     } catch (error) {

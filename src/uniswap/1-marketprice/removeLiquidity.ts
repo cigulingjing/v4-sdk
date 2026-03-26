@@ -15,6 +15,11 @@ export async function removeLiqByPosition(wallet: Wallet, tickLower: number, tic
     
     // Ensure liquidity is a positive BigInt before negating
     let liqDelta = BigInt(liquidityToRemove.toString());
+    
+    if (liqDelta === 0n) {
+        throw new Error("[SDK] Error: Cannot remove 0 liquidity. Action aborted.");
+    }
+    
     if (liqDelta > 0n) {
         liqDelta = liqDelta * -1n;
     }

@@ -27,10 +27,11 @@ async function deployDemo() {
     deployMockERC20(name,symbol,initialSupply);
 }
 // Deploy MockERC20 contract using Create2
-export async function deployMockERC20(name:string,symbol:string,initialSupply:bigint) : Promise<string> {
+export async function deployMockERC20(name:string,symbol:string,initialSupply:bigint, create2Address_opt?: string) : Promise<string> {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-    const create2Contract=await ethers.getContractAt("Create2",CONTRACT_ADDRESSES.Create2, wallet);
+    const create2Addr = create2Address_opt || CONTRACT_ADDRESSES.Create2;
+    const create2Contract=await ethers.getContractAt("Create2",create2Addr, wallet);
     let deployAddress=await create2Deploy(create2Contract,"MockERC20",["string","string","uint256"],[name,symbol,initialSupply],BigInt(123456789));
     console.log(`MockERC20Custom deployed by Create2 to: ${deployAddress}`);
     return deployAddress;

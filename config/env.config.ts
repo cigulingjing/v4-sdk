@@ -3,6 +3,8 @@ import { ethers } from "ethers";
 
 // const env = dotenv.config({ path: path.resolve(__dirname, "../.env") }).parsed || {};
 
+import addresses from "./addresses.json";
+
 /**
  * 环境变量配置接口定义
  */
@@ -144,20 +146,20 @@ function loadConfig(): EnvConfig {
             ),
         },
         contracts: {
-            mutiVoucher:getEnvValue("MutiVoucher","0x0000000000000000000000000000000000000044"),
+            mutiVoucher: addresses.mutiVoucher,
             auction: {
-                chainYVaultV2: getEnvValue("ChainYVaultV2", "0xAa9e62EB6d74d66Ff6720D1A8143c8237067Ff58"),
-                chainXAuctionV2: getEnvValue("ChainXAuctionV2", "0x88566F811b751Fa527A0816d99d6968E00f2eBef"),
-                coinbase: getEnvValue("Coinbase", "0xAa9e62EB6d74d66Ff6720D1A8143c8237067Ff58"),
+                chainYVaultV2: addresses.auction.chainYVaultV2,
+                chainXAuctionV2: addresses.auction.chainXAuctionV2,
+                coinbase: addresses.auction.coinbase,
             },
             uniswap: {
-                create2: getEnvValue("Create2", "0xCD8a1C3ba11CF5ECfa6267617243239504a98d90"),
-                token0: getEnvValue("Token0", "0x62B771ec87108E06E32291e81D4a9ec6b75B9393"),
-                token1: getEnvValue("Token1", "0xD0Fe15DCd319b834AB34e17AE3a82e9Ec0756fD1"),
-                poolManager: getEnvValue("PoolManager", "0xf1a3B2d7c11889Ec3146392ABaDD4fac3EEbd831"),
-                liquidPool: getEnvValue("LiquidPool", "0x46eDC5824c1a323aBd886842A59B7B3BbAaC2d83"),
-                limitOrder: getEnvValue("LimitOrder", "0x9c525D6B8f2E90653DC034c8506AB7ad8FfC9040"),
-                dynamicFee: getEnvValue("DynamicFee", "0xba80244ffA7ae0662f70464043514daED0E71040"),
+                create2: addresses.uniswap.create2,
+                token0: addresses.uniswap.token0,
+                token1: addresses.uniswap.token1,
+                poolManager: addresses.uniswap.poolManager,
+                liquidPool: addresses.uniswap.liquidPool,
+                limitOrder: addresses.uniswap.limitOrder,
+                dynamicFee: addresses.uniswap.dynamicFee,
             },
         },
         abiPaths: {
