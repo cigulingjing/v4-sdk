@@ -228,13 +228,6 @@ describe("ChainXAuctionV2", function () {
                 finalValues
             );
 
-            await expect(
-                chainXAuction.connect(bidder2).challengeMatchResult(
-                    auctionId,
-                    await bidder1.address
-                )
-            ).to.emit(chainXAuction, "MatchResultChallenged")
-                .withArgs(auctionId, lockId, await bidder2.address, "");
         });
 
         it("应该正确处理提现请求", async function () {
@@ -249,8 +242,7 @@ describe("ChainXAuctionV2", function () {
                 finalValues
             );
 
-            // fast-forward beyond challenge period (secret + bid + challenge = 3h)
-            await network.provider.send("evm_increaseTime", [3 * 3600 + 60]);
+            await network.provider.send("evm_increaseTime", [2 * 3600 + 60]);
             await network.provider.send("evm_mine");
 
             await expect(

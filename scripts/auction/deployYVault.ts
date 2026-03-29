@@ -1,8 +1,8 @@
-import{ ethers } from "hardhat";
-import { RPC_URL, PRIVATE_KEY, AUCTION_ADDR } from "../../config/auction.config";
-import { Wallet } from "ethers";
+import { ethers } from "hardhat";
+import { AUCTION_ADDR } from "../../config/auction.config";
+import { Signer } from "ethers";
 
-export async function deployYVault(wallet: Wallet, coinbaseAddr: string) {
+export async function deployYVault(wallet: Signer, coinbaseAddr: string) {
     const ChainYVaultV2Factory = await ethers.getContractFactory("ChainYVaultV2", wallet);
     const contract = await ChainYVaultV2Factory.deploy(coinbaseAddr);
     await contract.deployed();
@@ -11,8 +11,7 @@ export async function deployYVault(wallet: Wallet, coinbaseAddr: string) {
 
 
 async function main(){
-    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-    const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+    const [wallet] = await ethers.getSigners();
     const yVaultAddr = await deployYVault(wallet, AUCTION_ADDR.coinbase);
     console.log("ChainYVaultV2 deployed to:", yVaultAddr);
 };

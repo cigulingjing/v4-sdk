@@ -30,6 +30,24 @@ voucher测试通过
  npx hardhat test test/voucher.ts
 ```
 
+## 测试记录
+
+
+``` bash
+## 判断链是否启动
+➜ curl -s -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"web3_clientVersion","params":[]}' \
+  http://127.0.0.1:8666
+输出：
+{"jsonrpc":"2.0","id":1,"result":"Geth/v1.13.12-unstable-7b9ff3fc-20260126/linux-amd64/go1.22.5"}
+
+➜  v4-sdk git:(dev_lq) ✗ npx hardhat run scripts/auction/deploy.ts --network punk
+Deployment Summary:
+Coinbase Address: 0x0Ae15e8f240F0e05995da1Dda78403EC8FD13d9d
+ChainYVaultV2 Address: 0x10348E0919cF66251a23C179093a078E00F77A8B
+ChainXAuctionV2 Address: 0x322c9b5d6D18F611d6C0D545C631B158525d9DE0
+```
+
 
 
 ## UniswapV4及hook部署使用

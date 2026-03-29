@@ -1,7 +1,7 @@
 import { MatchResultWithdrawnEvent } from "./event";
 
 // * chainXAuction 相关参数
-export interface CreateAuctionParams {
+export interface CreateAuctionParamsX {
   seller: string;
   sourceChainId: number;
   activeAuctionCount: bigint;
@@ -58,7 +58,7 @@ export interface SetUnlockStrategyParams {
   strategyAddress: string;
 }
 
-export interface CreateAuctionParams {
+export interface CreateAuctionParamsY {
   configId: number;
   secretText: string;
   expirationTs: number;
