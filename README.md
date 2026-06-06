@@ -1,9 +1,8 @@
-
-# V4-SDK
+# 1. 总览
 
 提供punk交易区合约以及对应的部署脚本、测试脚本，sdk调用脚本。
 
-## 部署
+## 部署依赖
 |   依赖   |  版本      |
 |   ----   | ----       |
 |    nvm   |  0.39.7    |
@@ -15,7 +14,7 @@ npm install
 
 ```
 
-### 合约部署：
+## 合约部署：
 
 运行命令：
 ```shell
@@ -23,31 +22,7 @@ npx hardhat run scripts/deploy/deploy.ts
 npx hardhat run scripts/deploy/inits.ts
 ```
 
-## 测试
-voucher测试通过
-
-```shell
- npx hardhat test test/voucher.ts
-```
-
-## 测试记录
-
-
-``` bash
-## 判断链是否启动
-➜ curl -s -H 'Content-Type: application/json' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"web3_clientVersion","params":[]}' \
-  http://127.0.0.1:8666
-输出：
-{"jsonrpc":"2.0","id":1,"result":"Geth/v1.13.12-unstable-7b9ff3fc-20260126/linux-amd64/go1.22.5"}
-
-➜  v4-sdk git:(dev_lq) ✗ npx hardhat run scripts/auction/deploy.ts --network punk
-Deployment Summary:
-Coinbase Address: 0x0Ae15e8f240F0e05995da1Dda78403EC8FD13d9d
-ChainYVaultV2 Address: 0x10348E0919cF66251a23C179093a078E00F77A8B
-ChainXAuctionV2 Address: 0x322c9b5d6D18F611d6C0D545C631B158525d9DE0
-```
-
+# 2. 项目设计
 
 
 ## UniswapV4及hook部署使用
@@ -80,3 +55,32 @@ ChainXAuctionV2 Address: 0x322c9b5d6D18F611d6C0D545C631B158525d9DE0
 ## 待完成事项
 
 + 类似挖矿的流动性激励hook合约
+
+
+# 3. 测试
+voucher测试通过
+
+```shell
+ npx hardhat test test/voucher.ts
+```
+
+## 测试记录
+
+
+``` bash
+## 判断链是否启动
+➜ curl -s -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"web3_clientVersion","params":[]}' \
+  http://127.0.0.1:8666
+输出：
+{"jsonrpc":"2.0","id":1,"result":"Geth/v1.13.12-unstable-7b9ff3fc-20260126/linux-amd64/go1.22.5"}
+
+➜  v4-sdk git:(dev_lq) ✗ npx hardhat run scripts/auction/deploy.ts --network punk
+Deployment Summary:
+Coinbase Address: 0x0Ae15e8f240F0e05995da1Dda78403EC8FD13d9d
+ChainYVaultV2 Address: 0x10348E0919cF66251a23C179093a078E00F77A8B
+ChainXAuctionV2 Address: 0x322c9b5d6D18F611d6C0D545C631B158525d9DE0
+```
+
+
+
